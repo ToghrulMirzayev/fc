@@ -1,0 +1,2472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fitness Court — Admin Console Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Core surface */
+    --bg-deep: #0A0F1C;
+    --bg-base: #0E1424;
+    --bg-elev: #131B2E;
+    --bg-card: #161F36;
+    --bg-card-hover: #1A2540;
+    --border-subtle: rgba(255, 255, 255, 0.06);
+    --border-strong: rgba(255, 255, 255, 0.12);
+
+    /* Text */
+    --text-primary: #F5F7FA;
+    --text-secondary: #A8B0C0;
+    --text-tertiary: #6B7388;
+    --text-dim: #4A5163;
+
+    /* Accents — abandoning the green/white cliche */
+    --accent-coral: #FF5B49;      /* primary CTA, heartbeat, energy */
+    --accent-coral-dim: #B83A2D;
+    --accent-coral-soft: rgba(255, 91, 73, 0.12);
+
+    --accent-ozone: #D6FF5F;      /* positive metrics, growth */
+    --accent-ozone-dim: #98BC2C;
+    --accent-ozone-soft: rgba(214, 255, 95, 0.10);
+
+    --accent-ice: #6FA8FF;        /* informational, links */
+    --accent-ice-soft: rgba(111, 168, 255, 0.10);
+
+    --accent-warning: #FFB547;
+    --accent-danger: #FF5470;
+
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'Geist', -apple-system, sans-serif;
+    --font-mono: 'Geist Mono', 'SF Mono', monospace;
+
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-feature-settings: 'ss01' 1, 'cv11' 1, 'tnum' 1;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+    padding: 48px 32px;
+  }
+
+  .canvas {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 64px;
+  }
+
+  /* ─────────────────────────────────────────── */
+  /*  HEADER / TITLE STRIP                       */
+  /* ─────────────────────────────────────────── */
+  .doc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .doc-title {
+    font-family: var(--font-display);
+    font-size: 56px;
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .doc-title em {
+    font-style: italic;
+    color: var(--accent-coral);
+    font-weight: 500;
+  }
+  .doc-sub {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-top: 12px;
+    max-width: 540px;
+  }
+  .doc-meta {
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
+    line-height: 1.8;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .doc-meta strong { color: var(--text-primary); font-weight: 500; }
+
+  /* ─────────────────────────────────────────── */
+  /*  SECTION LABEL                              */
+  /* ─────────────────────────────────────────── */
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .section-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent-coral);
+    letter-spacing: 0.1em;
+  }
+  .section-name {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: -0.01em;
+  }
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border-subtle);
+  }
+
+  /* ─────────────────────────────────────────── */
+  /*  BROWSER FRAME                              */
+  /* ─────────────────────────────────────────── */
+  .frame {
+    background: var(--bg-base);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  .frame-bar {
+    height: 36px;
+    background: var(--bg-elev);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 8px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+  }
+  .frame-url {
+    flex: 1;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
+    letter-spacing: 0.02em;
+  }
+  .frame-url span { color: var(--text-primary); }
+
+  /* ─────────────────────────────────────────── */
+  /*  APP LAYOUT                                 */
+  /* ─────────────────────────────────────────── */
+  .app {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 720px;
+  }
+  .sidebar {
+    background: var(--bg-base);
+    border-right: 1px solid var(--border-subtle);
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 8px 24px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .logo-mark {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+  .logo-text {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+  .logo-text em {
+    font-style: italic;
+    color: var(--accent-coral);
+  }
+  .tenant-badge {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 3px 6px;
+    border-radius: 4px;
+  }
+  .nav-group {
+    margin-bottom: 20px;
+  }
+  .nav-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+    padding: 0 8px 8px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-size: 13px;
+    cursor: pointer;
+    position: relative;
+  }
+  .nav-item.active {
+    background: var(--accent-coral-soft);
+    color: var(--accent-coral);
+  }
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: -16px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: var(--accent-coral);
+    border-radius: 0 2px 2px 0;
+  }
+  .nav-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    fill: none;
+  }
+  .nav-count {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-tertiary);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .nav-item.active .nav-count {
+    background: rgba(255, 91, 73, 0.2);
+    color: var(--accent-coral);
+  }
+  .user-pill {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+  }
+  .avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-coral), var(--accent-coral-dim));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 12px; font-weight: 500; }
+  .user-role { font-size: 10px; color: var(--text-tertiary); font-family: var(--font-mono); }
+
+  /* ─────────────────────────────────────────── */
+  /*  MAIN CONTENT                               */
+  /* ─────────────────────────────────────────── */
+  .main {
+    padding: 32px 40px;
+    overflow: hidden;
+  }
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+  }
+  .page-head h1 {
+    font-family: var(--font-display);
+    font-size: 36px;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 6px;
+  }
+  .page-head .crumbs {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .page-head .crumbs span { color: var(--text-secondary); }
+
+  .actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .search {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 8px 12px 8px 32px;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 12px;
+    width: 220px;
+    position: relative;
+  }
+  .search-wrap { position: relative; }
+  .search-wrap::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    transform: translateY(-50%);
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%236B7388' stroke-width='2' viewBox='0 0 24 24'><circle cx='11' cy='11' r='7'/><path d='m21 21-4.3-4.3'/></svg>") center/contain no-repeat;
+  }
+  .kbd {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-dim);
+    border: 1px solid var(--border-subtle);
+    padding: 2px 5px;
+    border-radius: 3px;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .btn {
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-primary {
+    background: var(--accent-coral);
+    color: #fff;
+    border-color: var(--accent-coral);
+  }
+  .btn-icon {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+  }
+
+  /* ─────────────────────────────────────────── */
+  /*  KPI ROW                                    */
+  /* ─────────────────────────────────────────── */
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .kpi {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-tertiary);
+    margin-bottom: 12px;
+  }
+  .kpi-value {
+    font-family: var(--font-display);
+    font-size: 36px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  .kpi-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .kpi-delta.up {
+    background: var(--accent-ozone-soft);
+    color: var(--accent-ozone);
+  }
+  .kpi-delta.down {
+    background: rgba(255, 84, 112, 0.1);
+    color: var(--accent-danger);
+  }
+  .kpi-spark {
+    position: absolute;
+    right: 16px;
+    top: 16px;
+    width: 56px;
+    height: 24px;
+  }
+
+  /* ─────────────────────────────────────────── */
+  /*  CHART + LIST GRID                          */
+  /* ─────────────────────────────────────────── */
+  .panel-grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 16px;
+  }
+  .panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 20px 22px;
+  }
+  .panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .panel-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .panel-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-base);
+    padding: 3px;
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+  }
+  .panel-tab {
+    padding: 4px 10px;
+    border-radius: 4px;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .panel-tab.active {
+    background: var(--bg-card);
+    color: var(--text-primary);
+  }
+
+  .chart {
+    height: 220px;
+    position: relative;
+  }
+  .chart-y {
+    position: absolute;
+    left: 0; top: 0; bottom: 24px;
+    width: 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-dim);
+  }
+  .chart-area {
+    position: absolute;
+    left: 36px; right: 0; top: 0; bottom: 24px;
+  }
+  .chart-x {
+    position: absolute;
+    left: 36px; right: 0; bottom: 0;
+    height: 20px;
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-dim);
+    padding-top: 6px;
+  }
+
+  /* ─────────────────────────────────────────── */
+  /*  EXPIRING LIST                              */
+  /* ─────────────────────────────────────────── */
+  .list-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .list-item:last-child { border: 0; }
+  .list-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg-elev);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+  }
+  .list-name { font-size: 13px; font-weight: 500; }
+  .list-meta { font-size: 11px; color: var(--text-tertiary); font-family: var(--font-mono); }
+  .list-action {
+    margin-left: auto;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent-coral);
+    padding: 4px 8px;
+    border: 1px solid var(--accent-coral-dim);
+    border-radius: 4px;
+  }
+  .list-days {
+    margin-left: auto;
+    text-align: right;
+  }
+  .list-days-num {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--accent-warning);
+  }
+  .list-days-num.urgent { color: var(--accent-danger); }
+  .list-days-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+
+  /* ─────────────────────────────────────────── */
+  /*  MEMBERS TABLE                              */
+  /* ─────────────────────────────────────────── */
+  .filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .chip {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .chip.active {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+  }
+  .chip-count {
+    color: var(--text-tertiary);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th {
+    text-align: left;
+    padding: 10px 12px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-tertiary);
+    font-weight: 500;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  td {
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--border-subtle);
+    vertical-align: middle;
+  }
+  tr:last-child td { border: 0; }
+  tr:hover td { background: rgba(255, 255, 255, 0.02); }
+  .member-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .member-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .av-1 { background: linear-gradient(135deg, #FF5B49, #B83A2D); }
+  .av-2 { background: linear-gradient(135deg, #6FA8FF, #2D5FA8); }
+  .av-3 { background: linear-gradient(135deg, #D6FF5F, #7A9925); color: #2C3506; }
+  .av-4 { background: linear-gradient(135deg, #FFB547, #B07424); color: #3E2807; }
+  .av-5 { background: linear-gradient(135deg, #C77DFF, #6C32A8); }
+  .av-6 { background: linear-gradient(135deg, #FF5470, #A82645); }
+  .member-name { font-weight: 500; }
+  .member-phone { font-size: 11px; color: var(--text-tertiary); font-family: var(--font-mono); }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .pill::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .pill-active { color: var(--accent-ozone); background: var(--accent-ozone-soft); }
+  .pill-frozen { color: var(--accent-ice); background: var(--accent-ice-soft); }
+  .pill-expired { color: var(--accent-danger); background: rgba(255, 84, 112, 0.1); }
+  .pill-trial { color: var(--accent-warning); background: rgba(255, 181, 71, 0.1); }
+
+  .progress-bar {
+    width: 100px;
+    height: 4px;
+    background: var(--bg-base);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent-ozone);
+    border-radius: 2px;
+  }
+  .progress-fill.low { background: var(--accent-warning); }
+  .progress-fill.crit { background: var(--accent-danger); }
+  .progress-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-tertiary);
+    margin-top: 4px;
+  }
+
+  /* ─────────────────────────────────────────── */
+  /*  CHECK-IN SCANNER PANEL                     */
+  /* ─────────────────────────────────────────── */
+  .scanner-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+    min-height: 480px;
+  }
+  .scanner-stage {
+    background: var(--bg-deep);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .scanner-stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(rgba(255,91,73,0.03), transparent 30%),
+      radial-gradient(circle at 50% 30%, rgba(214,255,95,0.04), transparent 60%);
+    pointer-events: none;
+  }
+  .scanner-box {
+    width: 220px;
+    height: 220px;
+    border-radius: var(--radius-md);
+    background: #000;
+    position: relative;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .scanner-corners {
+    position: absolute;
+    inset: 12px;
+    pointer-events: none;
+  }
+  .scanner-corners::before,
+  .scanner-corners::after {
+    content: '';
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--accent-coral);
+  }
+  .scanner-corners::before {
+    top: 0; left: 0;
+    border-right: 0; border-bottom: 0;
+    border-top-left-radius: 4px;
+  }
+  .scanner-corners::after {
+    bottom: 0; right: 0;
+    border-left: 0; border-top: 0;
+    border-bottom-right-radius: 4px;
+  }
+  .scanner-line {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    top: 50%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent-coral), transparent);
+    box-shadow: 0 0 8px var(--accent-coral);
+  }
+  .scanner-status {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--accent-coral);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .scanner-pulse {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-coral);
+  }
+  .scanner-hint {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: 8px;
+    text-align: center;
+  }
+  .scanner-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .feed-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .feed-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 500;
+  }
+  .feed-counter {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
+  }
+  .feed-counter strong { color: var(--accent-ozone); }
+  .checkin-row {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+  }
+  .checkin-row.fresh {
+    border-color: var(--accent-coral-dim);
+    background: linear-gradient(90deg, var(--accent-coral-soft), var(--bg-card) 40%);
+  }
+  .checkin-row.fresh::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 12px;
+    bottom: 12px;
+    width: 2px;
+    background: var(--accent-coral);
+    border-radius: 0 2px 2px 0;
+  }
+  .checkin-time {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
+    width: 56px;
+    flex-shrink: 0;
+  }
+  .checkin-row.fresh .checkin-time { color: var(--accent-coral); }
+  .checkin-name {
+    font-size: 13px;
+    font-weight: 500;
+    flex: 1;
+  }
+  .checkin-plan {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+  }
+  .checkin-visits {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-secondary);
+    background: var(--bg-base);
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-left: auto;
+  }
+  .checkin-method {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    letter-spacing: 0.08em;
+  }
+
+  /* ─────────────────────────────────────────── */
+  /*  MEMBER PROFILE                             */
+  /* ─────────────────────────────────────────── */
+  .profile-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 24px;
+  }
+  .profile-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 24px;
+  }
+  .profile-avatar-big {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-coral), var(--accent-coral-dim));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 500;
+    color: #fff;
+    margin-bottom: 16px;
+  }
+  .profile-name {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+  .profile-id {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-bottom: 20px;
+  }
+  .profile-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 12px;
+  }
+  .profile-stat:last-child { border: 0; }
+  .profile-stat-key {
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .profile-stat-val { font-weight: 500; }
+  .profile-tg {
+    margin-top: 16px;
+    padding: 12px;
+    background: var(--bg-elev);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    color: var(--accent-ice);
+    font-family: var(--font-mono);
+  }
+  .tg-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  .profile-detail {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 24px;
+  }
+  .plan-hero {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 24px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .plan-name {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+  }
+  .plan-meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .plan-circle {
+    width: 96px;
+    height: 96px;
+    position: relative;
+  }
+  .plan-circle-val {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .plan-circle-num {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--accent-ozone);
+    line-height: 1;
+  }
+  .plan-circle-label {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    letter-spacing: 0.1em;
+    margin-top: 2px;
+  }
+
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    background: var(--border-subtle);
+  }
+  .timeline-item {
+    display: grid;
+    grid-template-columns: 20px 80px 1fr;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: 12px;
+    position: relative;
+  }
+  .timeline-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--bg-base);
+    border: 2px solid var(--text-tertiary);
+    margin-top: 4px;
+    margin-left: 2px;
+    position: relative;
+    z-index: 1;
+  }
+  .timeline-dot.success { border-color: var(--accent-ozone); background: var(--accent-ozone); }
+  .timeline-dot.coral { border-color: var(--accent-coral); background: var(--accent-coral); }
+  .timeline-dot.ice { border-color: var(--accent-ice); }
+  .timeline-time {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .timeline-content { color: var(--text-secondary); }
+  .timeline-content strong { color: var(--text-primary); font-weight: 500; }
+
+  /* ─────────────────────────────────────────── */
+  /*  TELEGRAM BOT MOCKUP                        */
+  /* ─────────────────────────────────────────── */
+  .phones {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    align-items: start;
+  }
+  .phone {
+    background: var(--bg-base);
+    border: 1px solid var(--border-subtle);
+    border-radius: 28px;
+    padding: 8px;
+    aspect-ratio: 9 / 18;
+    position: relative;
+    box-shadow: 0 24px 48px rgba(0,0,0,0.4);
+  }
+  .phone-screen {
+    background: #17212B;
+    border-radius: 22px;
+    width: 100%;
+    height: 100%;
+    padding: 24px 14px 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  .phone-notch {
+    position: absolute;
+    top: 6px; left: 50%;
+    transform: translateX(-50%);
+    width: 60px; height: 4px;
+    background: #000;
+    border-radius: 2px;
+  }
+  .tg-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 4px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    margin: -4px -8px 12px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .tg-bot-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--accent-coral);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .tg-bot-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .tg-bot-status {
+    font-size: 9px;
+    color: #5EBBF7;
+    font-family: var(--font-mono);
+  }
+
+  .tg-msg {
+    background: #182533;
+    border-radius: 10px 10px 10px 2px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    font-size: 11px;
+    line-height: 1.5;
+    color: #E1E9F0;
+    max-width: 90%;
+  }
+  .tg-msg-time {
+    display: block;
+    font-size: 8px;
+    color: #6F8195;
+    font-family: var(--font-mono);
+    margin-top: 4px;
+    text-align: right;
+  }
+  .tg-msg-from-user {
+    background: #2B5278;
+    align-self: flex-end;
+    border-radius: 10px 10px 2px 10px;
+    margin-left: auto;
+  }
+  .tg-plan-card {
+    background: #182533;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 8px;
+    border-left: 2px solid var(--accent-coral);
+  }
+  .tg-plan-title {
+    font-family: var(--font-display);
+    font-size: 14px;
+    color: #fff;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .tg-plan-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    padding: 3px 0;
+    color: #A8B5C2;
+  }
+  .tg-plan-row strong { color: #fff; font-weight: 500; }
+  .tg-plan-row.highlight strong { color: var(--accent-ozone); }
+  .tg-qr-box {
+    background: #fff;
+    width: 140px; height: 140px;
+    margin: 8px auto;
+    border-radius: 6px;
+    padding: 10px;
+    position: relative;
+  }
+  .tg-qr-meta {
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--accent-coral);
+    margin-bottom: 4px;
+  }
+  .tg-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    margin-top: auto;
+  }
+  .tg-btn {
+    background: #2B5278;
+    color: #fff;
+    font-size: 9px;
+    padding: 8px 6px;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: 500;
+  }
+
+  /* ─────────────────────────────────────────── */
+  /*  STYLE TILE                                 */
+  /* ─────────────────────────────────────────── */
+  .style-tile {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: 24px;
+    background: var(--bg-base);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+  }
+  .style-block h3 {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-tertiary);
+    margin-bottom: 16px;
+  }
+  .swatches {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .swatch {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+  }
+  .swatch-chip {
+    width: 100%;
+    height: 36px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+  }
+  .swatch-name {
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .swatch-hex {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+  }
+  .type-sample {
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .type-sample:last-child { border: 0; padding-bottom: 0; }
+  .type-display {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    margin-bottom: 6px;
+  }
+  .type-display em { font-style: italic; color: var(--accent-coral); }
+  .type-body {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+  .type-mono {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
+    letter-spacing: 0.05em;
+  }
+  .type-meta {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+  .logo-display {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+  }
+  .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-row .mark-lg {
+    width: 56px;
+    height: 56px;
+  }
+  .logo-wordmark {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+  .logo-wordmark em { font-style: italic; color: var(--accent-coral); }
+  .logo-note {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    line-height: 1.6;
+    max-width: 240px;
+  }
+
+  /* ─────────────────────────────────────────── */
+  /*  FOOTER                                     */
+  /* ─────────────────────────────────────────── */
+  .footer {
+    text-align: center;
+    padding: 32px 0;
+    border-top: 1px solid var(--border-subtle);
+    margin-top: 32px;
+  }
+  .footer-text {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
+</style>
+</head>
+<body>
+
+<!-- Reusable logo mark SVG: two angular strokes forming an upward chevron / abstract motion mark -->
+<svg style="display:none">
+  <defs>
+    <symbol id="logo-mark" viewBox="0 0 32 32">
+      <!-- Outer angular form -->
+      <path d="M6 24 L16 6 L26 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square" stroke-linejoin="miter"/>
+      <!-- Inner accent stroke (the coral hit) -->
+      <path d="M11 24 L16 14 L21 24" fill="none" stroke="#FF5B49" stroke-width="2.4" stroke-linecap="square" stroke-linejoin="miter"/>
+    </symbol>
+    <symbol id="logo-mark-lg" viewBox="0 0 64 64">
+      <path d="M12 48 L32 12 L52 48" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="square" stroke-linejoin="miter"/>
+      <path d="M22 48 L32 28 L42 48" fill="none" stroke="#FF5B49" stroke-width="4.5" stroke-linecap="square" stroke-linejoin="miter"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="canvas">
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- DOC HEADER                              -->
+  <!-- ─────────────────────────────────────── -->
+  <header class="doc-header">
+    <div>
+      <h1 class="doc-title">Design <em>system</em><br>&amp; key flows</h1>
+      <p class="doc-sub">Mockup of the admin console for a multi-tenant gym management platform. Working title <span style="font-family: var(--font-mono); color: var(--text-primary);">Fitness Court</span> — final brand TBD. Member-facing experience is delivered via Telegram bot in v1.0.</p>
+    </div>
+    <div class="doc-meta">
+      <div>Codename — <strong>Fitness Court</strong></div>
+      <div>Surface — <strong>Web admin</strong></div>
+      <div>Version — <strong>v1.0 mockup</strong></div>
+      <div>Mode — <strong>Dark only</strong></div>
+    </div>
+  </header>
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- STYLE TILE                              -->
+  <!-- ─────────────────────────────────────── -->
+  <section>
+    <div class="section-label">
+      <span class="section-num">01 / Foundation</span>
+      <span class="section-name">Brand &amp; system</span>
+      <span class="section-line"></span>
+    </div>
+
+    <div class="style-tile">
+      <!-- Logo & typography -->
+      <div class="style-block">
+        <h3>Mark &amp; wordmark</h3>
+        <div class="logo-display">
+          <div class="logo-row">
+            <svg class="mark-lg" style="color: var(--text-primary)"><use href="#logo-mark-lg"/></svg>
+            <span class="logo-wordmark">Gym<em>pass</em></span>
+          </div>
+          <p class="logo-note">An abstract chevron mark — a stylized peak, an upward arrow, a silhouette of momentum. Coral inner stroke nests inside a white outer one, suggesting compression and release. Independent of the working name, so the mark survives rebranding.</p>
+        </div>
+
+        <h3 style="margin-top:32px">Typography</h3>
+        <div class="type-sample">
+          <div class="type-display">Editorial <em>display</em></div>
+          <div class="type-meta">Fraunces — 32 / 500 / -0.02em</div>
+        </div>
+        <div class="type-sample">
+          <div class="type-body">Geist Sans handles every UI label, paragraph, and form input. Numbers use tabular figures.</div>
+          <div class="type-meta">Geist — 14 / 400</div>
+        </div>
+        <div class="type-sample">
+          <div class="type-mono">SYS_MONO · 0123456789 · MEMBER_ID</div>
+          <div class="type-meta">Geist Mono — 11 / 400 / 0.05em</div>
+        </div>
+      </div>
+
+      <!-- Core palette -->
+      <div class="style-block">
+        <h3>Surface</h3>
+        <div class="swatches">
+          <div class="swatch">
+            <div class="swatch-chip" style="background:#0A0F1C;"></div>
+            <div class="swatch-name">Ink</div>
+            <div class="swatch-hex">#0A0F1C</div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-chip" style="background:#161F36;"></div>
+            <div class="swatch-name">Slate</div>
+            <div class="swatch-hex">#161F36</div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-chip" style="background:#F5F7FA;"></div>
+            <div class="swatch-name" style="color:#0A0F1C">Bone</div>
+            <div class="swatch-hex">#F5F7FA</div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-chip" style="background:#6B7388;"></div>
+            <div class="swatch-name">Smoke</div>
+            <div class="swatch-hex">#6B7388</div>
+          </div>
+        </div>
+
+        <h3 style="margin-top:24px">Accent</h3>
+        <div class="swatches">
+          <div class="swatch">
+            <div class="swatch-chip" style="background:#FF5B49;"></div>
+            <div class="swatch-name">Coral</div>
+            <div class="swatch-hex">#FF5B49 — primary</div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-chip" style="background:#D6FF5F;"></div>
+            <div class="swatch-name" style="color:#0A0F1C">Ozone</div>
+            <div class="swatch-hex">#D6FF5F — growth</div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-chip" style="background:#6FA8FF;"></div>
+            <div class="swatch-name">Ice</div>
+            <div class="swatch-hex">#6FA8FF — info</div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-chip" style="background:#FF5470;"></div>
+            <div class="swatch-name">Pulse</div>
+            <div class="swatch-hex">#FF5470 — alert</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aesthetic rationale -->
+      <div class="style-block">
+        <h3>Direction</h3>
+        <p style="font-size:13px; color: var(--text-secondary); line-height:1.7; margin-bottom: 20px;">
+          <em style="font-family: var(--font-display); color: var(--text-primary); font-style: italic; font-size: 15px;">Midnight athletics.</em>
+          Dark base for operators who work eight-hour shifts. Editorial serif for tone — this is a tool, not a gadget. Coral as heartbeat, ozone as growth, ice for information. The green-and-white fitness cliché is deliberately avoided.
+        </p>
+
+        <h3>Principles</h3>
+        <ul style="font-size:12px; color: var(--text-secondary); line-height: 2; list-style: none; padding: 0;">
+          <li>→ Numbers are tabular and large</li>
+          <li>→ Status is a colored pill, not an icon</li>
+          <li>→ Receptionists never wait for a modal</li>
+          <li>→ Every list view has a keyboard shortcut</li>
+          <li>→ Tenant context is always visible</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- SCREEN 1 — DASHBOARD                    -->
+  <!-- ─────────────────────────────────────── -->
+  <section>
+    <div class="section-label">
+      <span class="section-num">02 / Screen</span>
+      <span class="section-name">Owner dashboard</span>
+      <span class="section-line"></span>
+    </div>
+
+    <div class="frame">
+      <div class="frame-bar">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="frame-url">iron.<span>fitnesscourt.com</span>/dashboard</div>
+      </div>
+
+      <div class="app">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+          <div class="logo">
+            <svg class="logo-mark" style="color: var(--text-primary)"><use href="#logo-mark"/></svg>
+            <span class="logo-text">Gym<em>pass</em></span>
+            <span class="tenant-badge">Iron</span>
+          </div>
+
+          <div class="nav-group">
+            <div class="nav-label">Operations</div>
+            <div class="nav-item active">
+              <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 12 12 3l9 9M5 10v10h14V10"/></svg>
+              Dashboard
+            </div>
+            <div class="nav-item">
+              <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>
+              Members
+              <span class="nav-count">847</span>
+            </div>
+            <div class="nav-item">
+              <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+              Check-ins
+              <span class="nav-count">62</span>
+            </div>
+            <div class="nav-item">
+              <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              Bookings
+            </div>
+          </div>
+
+          <div class="nav-group">
+            <div class="nav-label">Catalog</div>
+            <div class="nav-item">
+              <svg class="nav-icon" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
+              Plans
+            </div>
+            <div class="nav-item">
+              <svg class="nav-icon" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+              Payments
+            </div>
+            <div class="nav-item">
+              <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
+              Schedule
+            </div>
+          </div>
+
+          <div class="nav-group">
+            <div class="nav-label">Settings</div>
+            <div class="nav-item">
+              <svg class="nav-icon" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+              Notifications
+            </div>
+            <div class="nav-item">
+              <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9 1.65 1.65 0 0 0 4.27 7.18l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              Configuration
+            </div>
+          </div>
+
+          <div class="user-pill">
+            <div class="avatar">AK</div>
+            <div class="user-info">
+              <div class="user-name">Anna Kovac</div>
+              <div class="user-role">Owner</div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- MAIN -->
+        <main class="main">
+          <div class="topbar">
+            <div class="page-head">
+              <div class="crumbs">Operations / <span>Dashboard</span></div>
+              <h1>Tuesday, <em style="font-style:italic; color: var(--accent-coral); font-family: var(--font-display);">good morning</em>.</h1>
+            </div>
+            <div class="actions">
+              <div class="search-wrap">
+                <input class="search" placeholder="Search members, plans, payments…" />
+                <span class="kbd">⌘K</span>
+              </div>
+              <button class="btn">
+                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                Export
+              </button>
+              <button class="btn btn-primary">
+                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                New member
+              </button>
+            </div>
+          </div>
+
+          <!-- KPI ROW -->
+          <div class="kpis">
+            <div class="kpi">
+              <div class="kpi-label">Active members</div>
+              <div class="kpi-value">847</div>
+              <span class="kpi-delta up">↗ +24 this week</span>
+              <svg class="kpi-spark" viewBox="0 0 56 24">
+                <polyline points="0,18 8,16 16,14 24,12 32,10 40,8 48,6 56,4" fill="none" stroke="#D6FF5F" stroke-width="1.5"/>
+              </svg>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Revenue / Month</div>
+              <div class="kpi-value">€34.2<span style="font-size:18px; color: var(--text-tertiary);">k</span></div>
+              <span class="kpi-delta up">↗ +8.1%</span>
+              <svg class="kpi-spark" viewBox="0 0 56 24">
+                <polyline points="0,16 8,14 16,18 24,12 32,14 40,8 48,10 56,6" fill="none" stroke="#D6FF5F" stroke-width="1.5"/>
+              </svg>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Check-ins today</div>
+              <div class="kpi-value">187</div>
+              <span class="kpi-delta up">↗ +12% vs avg</span>
+              <svg class="kpi-spark" viewBox="0 0 56 24">
+                <polyline points="0,20 8,17 16,15 24,18 32,10 40,12 48,7 56,9" fill="none" stroke="#FF5B49" stroke-width="1.5"/>
+              </svg>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Churn risk</div>
+              <div class="kpi-value">23</div>
+              <span class="kpi-delta down">↘ 3 expire in 48h</span>
+              <svg class="kpi-spark" viewBox="0 0 56 24">
+                <polyline points="0,10 8,8 16,12 24,14 32,16 40,18 48,16 56,20" fill="none" stroke="#FF5470" stroke-width="1.5"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- CHART + LIST -->
+          <div class="panel-grid">
+            <div class="panel">
+              <div class="panel-head">
+                <div class="panel-title">Daily attendance</div>
+                <div class="panel-tabs">
+                  <div class="panel-tab">7d</div>
+                  <div class="panel-tab active">30d</div>
+                  <div class="panel-tab">90d</div>
+                </div>
+              </div>
+              <div class="chart">
+                <div class="chart-y">
+                  <span>240</span><span>180</span><span>120</span><span>60</span><span>0</span>
+                </div>
+                <svg class="chart-area" viewBox="0 0 600 196" preserveAspectRatio="none">
+                  <!-- grid -->
+                  <line x1="0" y1="49" x2="600" y2="49" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+                  <line x1="0" y1="98" x2="600" y2="98" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+                  <line x1="0" y1="147" x2="600" y2="147" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+
+                  <!-- area fill under line -->
+                  <path d="M0,140 L20,135 L40,128 L60,122 L80,118 L100,110 L120,115 L140,108 L160,95 L180,98 L200,85 L220,90 L240,80 L260,68 L280,72 L300,65 L320,58 L340,62 L360,50 L380,55 L400,42 L420,48 L440,38 L460,32 L480,40 L500,28 L520,25 L540,30 L560,22 L580,18 L600,15 L600,196 L0,196 Z" fill="url(#chartGrad)"/>
+
+                  <!-- line -->
+                  <path d="M0,140 L20,135 L40,128 L60,122 L80,118 L100,110 L120,115 L140,108 L160,95 L180,98 L200,85 L220,90 L240,80 L260,68 L280,72 L300,65 L320,58 L340,62 L360,50 L380,55 L400,42 L420,48 L440,38 L460,32 L480,40 L500,28 L520,25 L540,30 L560,22 L580,18 L600,15" fill="none" stroke="#FF5B49" stroke-width="2"/>
+
+                  <!-- secondary line - last month -->
+                  <path d="M0,150 L40,148 L80,140 L120,138 L160,130 L200,122 L240,118 L280,108 L320,100 L360,92 L400,85 L440,78 L480,70 L520,65 L560,60 L600,55" fill="none" stroke="#6B7388" stroke-width="1.2" stroke-dasharray="3 3"/>
+
+                  <!-- point -->
+                  <circle cx="600" cy="15" r="4" fill="#FF5B49"/>
+                  <circle cx="600" cy="15" r="8" fill="#FF5B49" opacity="0.2"/>
+
+                  <defs>
+                    <linearGradient id="chartGrad" x1="0" x2="0" y1="0" y2="1">
+                      <stop offset="0%" stop-color="#FF5B49" stop-opacity="0.18"/>
+                      <stop offset="100%" stop-color="#FF5B49" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div class="chart-x">
+                  <span>Apr 16</span><span>Apr 23</span><span>Apr 30</span><span>May 7</span><span>May 14</span>
+                </div>
+              </div>
+              <div style="display:flex; gap:16px; margin-top: 16px; font-size:11px; font-family: var(--font-mono); color: var(--text-tertiary);">
+                <span><span style="display:inline-block;width:8px;height:2px;background:#FF5B49;vertical-align:middle;margin-right:6px;"></span>This period</span>
+                <span><span style="display:inline-block;width:8px;height:2px;background:#6B7388;vertical-align:middle;margin-right:6px;"></span>Previous</span>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <div class="panel-title">Expiring soon</div>
+                <a style="font-size:11px; font-family: var(--font-mono); color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em;">View all →</a>
+              </div>
+              <div class="list-item">
+                <div class="list-avatar" style="background: linear-gradient(135deg, #FF5B49, #B83A2D); color:#fff;">EM</div>
+                <div>
+                  <div class="list-name">Elena Markovic</div>
+                  <div class="list-meta">Monthly · Unlimited</div>
+                </div>
+                <div class="list-days">
+                  <div class="list-days-num urgent">2</div>
+                  <div class="list-days-label">days left</div>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="list-avatar" style="background: linear-gradient(135deg, #6FA8FF, #2D5FA8); color:#fff;">DT</div>
+                <div>
+                  <div class="list-name">Damir Tahir</div>
+                  <div class="list-meta">10 visits · 3 left</div>
+                </div>
+                <div class="list-days">
+                  <div class="list-days-num urgent">3</div>
+                  <div class="list-days-label">days left</div>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="list-avatar" style="background: linear-gradient(135deg, #D6FF5F, #7A9925); color:#2C3506;">PV</div>
+                <div>
+                  <div class="list-name">Petra Volkov</div>
+                  <div class="list-meta">Yearly · Premium</div>
+                </div>
+                <div class="list-days">
+                  <div class="list-days-num">5</div>
+                  <div class="list-days-label">days left</div>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="list-avatar" style="background: linear-gradient(135deg, #FFB547, #B07424); color:#3E2807;">JK</div>
+                <div>
+                  <div class="list-name">Jovan Kostic</div>
+                  <div class="list-meta">Trial · 7 days</div>
+                </div>
+                <div class="list-days">
+                  <div class="list-days-num">6</div>
+                  <div class="list-days-label">days left</div>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="list-avatar" style="background: linear-gradient(135deg, #C77DFF, #6C32A8); color:#fff;">LB</div>
+                <div>
+                  <div class="list-name">Larisa Brkic</div>
+                  <div class="list-meta">Monthly · Limited</div>
+                </div>
+                <div class="list-days">
+                  <div class="list-days-num">6</div>
+                  <div class="list-days-label">days left</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- SCREEN 2 — MEMBERS                      -->
+  <!-- ─────────────────────────────────────── -->
+  <section>
+    <div class="section-label">
+      <span class="section-num">03 / Screen</span>
+      <span class="section-name">Members directory</span>
+      <span class="section-line"></span>
+    </div>
+
+    <div class="frame">
+      <div class="frame-bar">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="frame-url">iron.<span>fitnesscourt.com</span>/members</div>
+      </div>
+      <div class="app">
+        <aside class="sidebar">
+          <div class="logo">
+            <svg class="logo-mark" style="color: var(--text-primary)"><use href="#logo-mark"/></svg>
+            <span class="logo-text">Gym<em>pass</em></span>
+            <span class="tenant-badge">Iron</span>
+          </div>
+          <div class="nav-group">
+            <div class="nav-label">Operations</div>
+            <div class="nav-item">
+              <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 12 12 3l9 9M5 10v10h14V10"/></svg>
+              Dashboard
+            </div>
+            <div class="nav-item active">
+              <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>
+              Members
+              <span class="nav-count">847</span>
+            </div>
+            <div class="nav-item">
+              <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+              Check-ins
+              <span class="nav-count">62</span>
+            </div>
+            <div class="nav-item">
+              <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              Bookings
+            </div>
+          </div>
+          <div class="user-pill">
+            <div class="avatar">AK</div>
+            <div class="user-info">
+              <div class="user-name">Anna Kovac</div>
+              <div class="user-role">Owner</div>
+            </div>
+          </div>
+        </aside>
+
+        <main class="main">
+          <div class="topbar">
+            <div class="page-head">
+              <div class="crumbs">Operations / <span>Members</span></div>
+              <h1>Members <em style="font-family: var(--font-display); font-style: italic; color: var(--text-tertiary);">/ 847</em></h1>
+            </div>
+            <div class="actions">
+              <div class="search-wrap">
+                <input class="search" placeholder="Name, phone, email…" />
+                <span class="kbd">⌘K</span>
+              </div>
+              <button class="btn">
+                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+                Filter
+              </button>
+              <button class="btn btn-primary">
+                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                Add member
+              </button>
+            </div>
+          </div>
+
+          <div class="filters">
+            <span class="chip active">All <span class="chip-count">847</span></span>
+            <span class="chip">Active <span class="chip-count">724</span></span>
+            <span class="chip">Frozen <span class="chip-count">38</span></span>
+            <span class="chip">Trial <span class="chip-count">12</span></span>
+            <span class="chip">Expired <span class="chip-count">73</span></span>
+            <span class="chip">Expiring 7d <span class="chip-count">23</span></span>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 32%">Member</th>
+                <th>Status</th>
+                <th>Plan</th>
+                <th>Usage</th>
+                <th>Expires</th>
+                <th style="width: 80px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="member-cell">
+                    <div class="member-avatar av-1">EM</div>
+                    <div>
+                      <div class="member-name">Elena Markovic</div>
+                      <div class="member-phone">+387 61 234 567</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="pill pill-active">Active</span></td>
+                <td><span style="font-size:13px;">Monthly</span><br><span class="member-phone">Unlimited</span></td>
+                <td>
+                  <div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div>
+                  <div class="progress-label">24 / 30 days</div>
+                </td>
+                <td style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-danger);">in 2d</td>
+                <td><span style="font-family: var(--font-mono); font-size: 16px; color: var(--text-tertiary);">→</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="member-cell">
+                    <div class="member-avatar av-2">DT</div>
+                    <div>
+                      <div class="member-name">Damir Tahir</div>
+                      <div class="member-phone">+387 62 891 422</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="pill pill-active">Active</span></td>
+                <td><span style="font-size:13px;">10-visit pack</span><br><span class="member-phone">Limited</span></td>
+                <td>
+                  <div class="progress-bar"><div class="progress-fill crit" style="width:30%"></div></div>
+                  <div class="progress-label">3 / 10 visits left</div>
+                </td>
+                <td style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-danger);">in 3d</td>
+                <td><span style="font-family: var(--font-mono); font-size: 16px; color: var(--text-tertiary);">→</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="member-cell">
+                    <div class="member-avatar av-3">PV</div>
+                    <div>
+                      <div class="member-name">Petra Volkov</div>
+                      <div class="member-phone">+387 63 102 884</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="pill pill-frozen">Frozen</span></td>
+                <td><span style="font-size:13px;">Yearly Premium</span><br><span class="member-phone">Auto-resume Jun 1</span></td>
+                <td>
+                  <div class="progress-bar"><div class="progress-fill" style="width:62%"></div></div>
+                  <div class="progress-label">227 / 365 days</div>
+                </td>
+                <td style="font-family: var(--font-mono); font-size: 11px;">Jan 4, 2027</td>
+                <td><span style="font-family: var(--font-mono); font-size: 16px; color: var(--text-tertiary);">→</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="member-cell">
+                    <div class="member-avatar av-4">JK</div>
+                    <div>
+                      <div class="member-name">Jovan Kostic</div>
+                      <div class="member-phone">+387 65 720 519</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="pill pill-trial">Trial</span></td>
+                <td><span style="font-size:13px;">Free trial</span><br><span class="member-phone">7-day pass</span></td>
+                <td>
+                  <div class="progress-bar"><div class="progress-fill low" style="width:55%"></div></div>
+                  <div class="progress-label">3 / 7 days</div>
+                </td>
+                <td style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-warning);">in 6d</td>
+                <td><span style="font-family: var(--font-mono); font-size: 16px; color: var(--text-tertiary);">→</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="member-cell">
+                    <div class="member-avatar av-5">LB</div>
+                    <div>
+                      <div class="member-name">Larisa Brkic</div>
+                      <div class="member-phone">+387 66 408 313</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="pill pill-active">Active</span></td>
+                <td><span style="font-size:13px;">Monthly</span><br><span class="member-phone">12 visits</span></td>
+                <td>
+                  <div class="progress-bar"><div class="progress-fill" style="width:75%"></div></div>
+                  <div class="progress-label">9 / 12 visits left</div>
+                </td>
+                <td style="font-family: var(--font-mono); font-size: 11px;">May 22</td>
+                <td><span style="font-family: var(--font-mono); font-size: 16px; color: var(--text-tertiary);">→</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="member-cell">
+                    <div class="member-avatar av-6">NS</div>
+                    <div>
+                      <div class="member-name">Nikola Stojanovic</div>
+                      <div class="member-phone">+387 60 555 901</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="pill pill-expired">Expired</span></td>
+                <td><span style="font-size:13px;">Monthly Premium</span><br><span class="member-phone">Lapsed</span></td>
+                <td>
+                  <div class="progress-bar"><div class="progress-fill crit" style="width:0%"></div></div>
+                  <div class="progress-label">0 / 30 days</div>
+                </td>
+                <td style="font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary);">May 8</td>
+                <td><span style="font-family: var(--font-mono); font-size: 16px; color: var(--text-tertiary);">→</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="member-cell">
+                    <div class="member-avatar av-1">MR</div>
+                    <div>
+                      <div class="member-name">Maja Radic</div>
+                      <div class="member-phone">+387 61 884 207</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="pill pill-active">Active</span></td>
+                <td><span style="font-size:13px;">Yearly</span><br><span class="member-phone">Unlimited</span></td>
+                <td>
+                  <div class="progress-bar"><div class="progress-fill" style="width:32%"></div></div>
+                  <div class="progress-label">117 / 365 days</div>
+                </td>
+                <td style="font-family: var(--font-mono); font-size: 11px;">Sep 14, 2026</td>
+                <td><span style="font-family: var(--font-mono); font-size: 16px; color: var(--text-tertiary);">→</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </main>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- SCREEN 3 — CHECK-IN SCANNER             -->
+  <!-- ─────────────────────────────────────── -->
+  <section>
+    <div class="section-label">
+      <span class="section-num">04 / Screen</span>
+      <span class="section-name">Front-desk check-in</span>
+      <span class="section-line"></span>
+    </div>
+
+    <div class="frame">
+      <div class="frame-bar">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="frame-url">iron.<span>fitnesscourt.com</span>/checkins/scan</div>
+      </div>
+      <div class="app">
+        <aside class="sidebar">
+          <div class="logo">
+            <svg class="logo-mark" style="color: var(--text-primary)"><use href="#logo-mark"/></svg>
+            <span class="logo-text">Gym<em>pass</em></span>
+            <span class="tenant-badge">Iron</span>
+          </div>
+          <div class="nav-group">
+            <div class="nav-label">Operations</div>
+            <div class="nav-item">
+              <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 12 12 3l9 9M5 10v10h14V10"/></svg>
+              Dashboard
+            </div>
+            <div class="nav-item">
+              <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>
+              Members
+              <span class="nav-count">847</span>
+            </div>
+            <div class="nav-item active">
+              <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+              Check-ins
+              <span class="nav-count">62</span>
+            </div>
+            <div class="nav-item">
+              <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              Bookings
+            </div>
+          </div>
+          <div class="user-pill">
+            <div class="avatar" style="background: linear-gradient(135deg, #6FA8FF, #2D5FA8);">SR</div>
+            <div class="user-info">
+              <div class="user-name">Sara Rakic</div>
+              <div class="user-role">Reception</div>
+            </div>
+          </div>
+        </aside>
+
+        <main class="main">
+          <div class="topbar">
+            <div class="page-head">
+              <div class="crumbs">Operations / Check-ins / <span>Scan</span></div>
+              <h1>Front <em style="font-family: var(--font-display); font-style: italic; color: var(--accent-coral);">desk</em></h1>
+            </div>
+            <div class="actions">
+              <button class="btn">
+                <svg class="btn-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                Manual check-in
+              </button>
+            </div>
+          </div>
+
+          <div class="scanner-grid">
+            <!-- Scanner stage -->
+            <div class="scanner-stage">
+              <div class="scanner-box">
+                <div class="scanner-corners"></div>
+                <div class="scanner-line"></div>
+              </div>
+              <div class="scanner-status">
+                <span class="scanner-pulse"></span>
+                Awaiting QR
+              </div>
+              <p class="scanner-hint">Point camera at member's<br>Telegram QR code</p>
+              <div style="margin-top: 24px; padding: 12px 16px; background: var(--bg-card); border-radius: var(--radius-md); font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; display:flex; gap: 12px;">
+                <span>Today</span>
+                <span style="color: var(--accent-ozone);">62 scanned</span>
+                <span>1 rejected</span>
+              </div>
+            </div>
+
+            <!-- Feed -->
+            <div class="scanner-feed">
+              <div class="feed-head">
+                <div class="feed-title">Live feed</div>
+                <div class="feed-counter"><strong>62</strong> check-ins · last <strong>1m ago</strong></div>
+              </div>
+
+              <div class="checkin-row fresh">
+                <span class="checkin-time">09:47</span>
+                <div style="flex:1;">
+                  <div class="checkin-name">Marko Petrovic</div>
+                  <div class="checkin-plan">Monthly · Unlimited</div>
+                </div>
+                <span class="checkin-visits">∞ visits</span>
+                <span class="checkin-method">QR</span>
+              </div>
+              <div class="checkin-row">
+                <span class="checkin-time">09:42</span>
+                <div style="flex:1;">
+                  <div class="checkin-name">Ivana Lazarevic</div>
+                  <div class="checkin-plan">10-visit · 4 left</div>
+                </div>
+                <span class="checkin-visits">3 left</span>
+                <span class="checkin-method">QR</span>
+              </div>
+              <div class="checkin-row">
+                <span class="checkin-time">09:38</span>
+                <div style="flex:1;">
+                  <div class="checkin-name">Stefan Mihailovic</div>
+                  <div class="checkin-plan">Yearly Premium</div>
+                </div>
+                <span class="checkin-visits">∞ visits</span>
+                <span class="checkin-method">Manual</span>
+              </div>
+              <div class="checkin-row">
+                <span class="checkin-time">09:31</span>
+                <div style="flex:1;">
+                  <div class="checkin-name">Tijana Vukic</div>
+                  <div class="checkin-plan">Monthly · 12 visits</div>
+                </div>
+                <span class="checkin-visits">7 left</span>
+                <span class="checkin-method">QR</span>
+              </div>
+              <div class="checkin-row">
+                <span class="checkin-time">09:24</span>
+                <div style="flex:1;">
+                  <div class="checkin-name">Dejan Ostojic</div>
+                  <div class="checkin-plan">Monthly · Unlimited</div>
+                </div>
+                <span class="checkin-visits">∞ visits</span>
+                <span class="checkin-method">QR</span>
+              </div>
+              <div class="checkin-row" style="opacity: 0.55;">
+                <span class="checkin-time" style="color: var(--accent-danger);">09:19</span>
+                <div style="flex:1;">
+                  <div class="checkin-name" style="color: var(--accent-danger);">Boris Antic</div>
+                  <div class="checkin-plan">Anti-passback (60s cooldown)</div>
+                </div>
+                <span class="checkin-visits" style="color: var(--accent-danger); background: rgba(255,84,112,0.1);">rejected</span>
+                <span class="checkin-method">QR</span>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- SCREEN 4 — MEMBER PROFILE               -->
+  <!-- ─────────────────────────────────────── -->
+  <section>
+    <div class="section-label">
+      <span class="section-num">05 / Screen</span>
+      <span class="section-name">Member profile</span>
+      <span class="section-line"></span>
+    </div>
+
+    <div class="frame">
+      <div class="frame-bar">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="frame-url">iron.<span>fitnesscourt.com</span>/members/elena-markovic</div>
+      </div>
+      <div class="app">
+        <aside class="sidebar">
+          <div class="logo">
+            <svg class="logo-mark" style="color: var(--text-primary)"><use href="#logo-mark"/></svg>
+            <span class="logo-text">Gym<em>pass</em></span>
+            <span class="tenant-badge">Iron</span>
+          </div>
+          <div class="nav-group">
+            <div class="nav-label">Operations</div>
+            <div class="nav-item">
+              <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 12 12 3l9 9M5 10v10h14V10"/></svg>
+              Dashboard
+            </div>
+            <div class="nav-item active">
+              <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>
+              Members
+              <span class="nav-count">847</span>
+            </div>
+            <div class="nav-item">
+              <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+              Check-ins
+            </div>
+          </div>
+          <div class="user-pill">
+            <div class="avatar">AK</div>
+            <div class="user-info">
+              <div class="user-name">Anna Kovac</div>
+              <div class="user-role">Owner</div>
+            </div>
+          </div>
+        </aside>
+
+        <main class="main">
+          <div class="topbar">
+            <div class="page-head">
+              <div class="crumbs">Members / <span>Elena Markovic</span></div>
+              <h1>Elena <em style="font-family: var(--font-display); font-style: italic; color: var(--text-tertiary);">Markovic</em></h1>
+            </div>
+            <div class="actions">
+              <button class="btn">
+                <svg class="btn-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M16 11l-4 4-4-4M12 15V3"/></svg>
+                Freeze plan
+              </button>
+              <button class="btn btn-primary">
+                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                Renew
+              </button>
+            </div>
+          </div>
+
+          <div class="profile-grid">
+            <!-- Left: profile card -->
+            <div>
+              <div class="profile-card">
+                <div class="profile-avatar-big">EM</div>
+                <div class="profile-name">Elena Markovic</div>
+                <div class="profile-id">MBR_2024_00427</div>
+
+                <div class="profile-stat">
+                  <span class="profile-stat-key">Phone</span>
+                  <span class="profile-stat-val">+387 61 234 567</span>
+                </div>
+                <div class="profile-stat">
+                  <span class="profile-stat-key">Email</span>
+                  <span class="profile-stat-val">elena.m@mail.ba</span>
+                </div>
+                <div class="profile-stat">
+                  <span class="profile-stat-key">Member since</span>
+                  <span class="profile-stat-val">Mar 12, 2024</span>
+                </div>
+                <div class="profile-stat">
+                  <span class="profile-stat-key">Lifetime visits</span>
+                  <span class="profile-stat-val">218</span>
+                </div>
+                <div class="profile-stat">
+                  <span class="profile-stat-key">Lifetime value</span>
+                  <span class="profile-stat-val">€840</span>
+                </div>
+
+                <div class="profile-tg">
+                  <svg class="tg-icon" viewBox="0 0 24 24" fill="#6FA8FF">
+                    <path d="M21.5 4.5 18.4 19.7c-.2 1-.9 1.3-1.7.8l-4.7-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.7L17.5 7c.4-.3-.1-.5-.5-.2L9.5 11.5l-4.6-1.4c-1-.3-1-.9.2-1.4L20 3.2c.9-.3 1.6.2 1.5 1.3z"/>
+                  </svg>
+                  Linked to Telegram · @elena_m
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: plan details + timeline -->
+            <div>
+              <div class="profile-detail">
+                <div class="plan-hero">
+                  <div>
+                    <div class="plan-meta">Active plan</div>
+                    <div class="plan-name">Monthly <em style="font-style: italic; color: var(--accent-coral);">Unlimited</em></div>
+                    <div style="display: flex; gap: 16px; margin-top: 12px; font-size: 12px; color: var(--text-secondary);">
+                      <span><span style="color: var(--text-tertiary); font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">Started</span>Apr 18, 2026</span>
+                      <span><span style="color: var(--text-tertiary); font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">Expires</span><span style="color: var(--accent-danger);">May 18, 2026</span></span>
+                      <span><span style="color: var(--text-tertiary); font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">Renewals</span>14×</span>
+                    </div>
+                  </div>
+                  <div class="plan-circle">
+                    <svg viewBox="0 0 96 96" style="transform: rotate(-90deg);">
+                      <circle cx="48" cy="48" r="40" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
+                      <circle cx="48" cy="48" r="40" fill="none" stroke="#D6FF5F" stroke-width="6" stroke-dasharray="251" stroke-dashoffset="50" stroke-linecap="round"/>
+                    </svg>
+                    <div class="plan-circle-val">
+                      <span class="plan-circle-num">80<span style="font-size:14px; color: var(--text-tertiary)">%</span></span>
+                      <span class="plan-circle-label">used</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                  <div style="font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-tertiary); margin-bottom: 16px;">Recent activity</div>
+
+                  <div class="timeline">
+                    <div class="timeline-item">
+                      <div class="timeline-dot coral"></div>
+                      <span class="timeline-time">09:14</span>
+                      <div class="timeline-content"><strong>Check-in</strong> via Telegram QR · main entrance</div>
+                    </div>
+                    <div class="timeline-item">
+                      <div class="timeline-dot success"></div>
+                      <span class="timeline-time">Yesterday</span>
+                      <div class="timeline-content"><strong>Booked</strong> Yoga Flow class · Thu 7 PM</div>
+                    </div>
+                    <div class="timeline-item">
+                      <div class="timeline-dot"></div>
+                      <span class="timeline-time">May 12</span>
+                      <div class="timeline-content"><strong>Note added</strong> by Sara — prefers morning slots</div>
+                    </div>
+                    <div class="timeline-item">
+                      <div class="timeline-dot ice"></div>
+                      <span class="timeline-time">May 8</span>
+                      <div class="timeline-content"><strong>Telegram linked</strong> via one-time code from Sara</div>
+                    </div>
+                    <div class="timeline-item">
+                      <div class="timeline-dot success"></div>
+                      <span class="timeline-time">Apr 18</span>
+                      <div class="timeline-content"><strong>Payment received</strong> · €60 via bank transfer · Apr cycle</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- SECTION — TELEGRAM BOT                  -->
+  <!-- ─────────────────────────────────────── -->
+  <section>
+    <div class="section-label">
+      <span class="section-num">06 / Member surface</span>
+      <span class="section-name">Telegram bot</span>
+      <span class="section-line"></span>
+    </div>
+
+    <div class="phones">
+      <!-- Phone 1: Welcome / Link -->
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="tg-header">
+            <div class="tg-bot-avatar">
+              <svg width="14" height="14" viewBox="0 0 32 32" style="color:#fff"><use href="#logo-mark"/></svg>
+            </div>
+            <div>
+              <div class="tg-bot-name">Iron Gym bot</div>
+              <div class="tg-bot-status">● Online</div>
+            </div>
+          </div>
+
+          <div class="tg-msg">
+            👋 Welcome to <strong>Iron Gym</strong>!<br><br>
+            Your account isn't linked yet. Ask reception for a one-time code and send it here.
+            <span class="tg-msg-time">09:02</span>
+          </div>
+          <div class="tg-msg tg-msg-from-user">
+            <span style="font-family: var(--font-mono); font-size: 13px;">472 891</span>
+            <span class="tg-msg-time" style="color: rgba(255,255,255,0.5)">09:14 ✓✓</span>
+          </div>
+          <div class="tg-msg">
+            ✅ <strong>Linked, Elena!</strong><br>
+            Tap a button below to get started.
+            <span class="tg-msg-time">09:14</span>
+          </div>
+
+          <div class="tg-buttons">
+            <div class="tg-btn">📋 My plan</div>
+            <div class="tg-btn">🎫 Show QR</div>
+            <div class="tg-btn">📊 History</div>
+            <div class="tg-btn">❓ Help</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phone 2: Plan view -->
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="tg-header">
+            <div class="tg-bot-avatar">
+              <svg width="14" height="14" viewBox="0 0 32 32" style="color:#fff"><use href="#logo-mark"/></svg>
+            </div>
+            <div>
+              <div class="tg-bot-name">Iron Gym bot</div>
+              <div class="tg-bot-status">● Online</div>
+            </div>
+          </div>
+
+          <div class="tg-msg tg-msg-from-user" style="font-size: 10px;">
+            📋 My plan
+            <span class="tg-msg-time" style="color: rgba(255,255,255,0.5)">09:15 ✓✓</span>
+          </div>
+
+          <div class="tg-plan-card">
+            <div class="tg-plan-title">Monthly Unlimited</div>
+            <div class="tg-plan-row"><span>Status</span><strong style="color: #D6FF5F;">● Active</strong></div>
+            <div class="tg-plan-row"><span>Started</span><strong>Apr 18, 2026</strong></div>
+            <div class="tg-plan-row highlight"><span>Expires</span><strong>in 2 days</strong></div>
+            <div class="tg-plan-row"><span>Visits this month</span><strong>18 / ∞</strong></div>
+            <div class="tg-plan-row"><span>Branch</span><strong>Iron · Sarajevo</strong></div>
+          </div>
+
+          <div class="tg-msg">
+            ⚠️ Your plan expires soon. Visit reception to renew or pay via your bank transfer link.
+            <span class="tg-msg-time">09:15</span>
+          </div>
+
+          <div class="tg-buttons">
+            <div class="tg-btn">📋 My plan</div>
+            <div class="tg-btn">🎫 Show QR</div>
+            <div class="tg-btn">📊 History</div>
+            <div class="tg-btn">❓ Help</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phone 3: QR -->
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="tg-header">
+            <div class="tg-bot-avatar">
+              <svg width="14" height="14" viewBox="0 0 32 32" style="color:#fff"><use href="#logo-mark"/></svg>
+            </div>
+            <div>
+              <div class="tg-bot-name">Iron Gym bot</div>
+              <div class="tg-bot-status">● Online</div>
+            </div>
+          </div>
+
+          <div class="tg-msg tg-msg-from-user" style="font-size: 10px;">
+            🎫 Show QR
+            <span class="tg-msg-time" style="color: rgba(255,255,255,0.5)">09:16 ✓✓</span>
+          </div>
+
+          <div class="tg-qr-meta">↻ Refreshes in 24s</div>
+          <div class="tg-qr-box">
+            <!-- Stylized QR -->
+            <svg viewBox="0 0 100 100" style="width:100%;height:100%;">
+              <!-- corner finders -->
+              <rect x="0" y="0" width="24" height="24" fill="#000"/>
+              <rect x="4" y="4" width="16" height="16" fill="#fff"/>
+              <rect x="8" y="8" width="8" height="8" fill="#000"/>
+              <rect x="76" y="0" width="24" height="24" fill="#000"/>
+              <rect x="80" y="4" width="16" height="16" fill="#fff"/>
+              <rect x="84" y="8" width="8" height="8" fill="#000"/>
+              <rect x="0" y="76" width="24" height="24" fill="#000"/>
+              <rect x="4" y="80" width="16" height="16" fill="#fff"/>
+              <rect x="8" y="84" width="8" height="8" fill="#000"/>
+              <!-- noise pattern -->
+              <g fill="#000">
+                <rect x="30" y="4" width="4" height="4"/><rect x="38" y="4" width="4" height="4"/><rect x="46" y="4" width="4" height="4"/><rect x="58" y="4" width="4" height="4"/><rect x="66" y="4" width="4" height="4"/>
+                <rect x="30" y="12" width="4" height="4"/><rect x="42" y="12" width="4" height="4"/><rect x="50" y="12" width="4" height="4"/><rect x="62" y="12" width="4" height="4"/>
+                <rect x="34" y="20" width="4" height="4"/><rect x="46" y="20" width="4" height="4"/><rect x="54" y="20" width="4" height="4"/><rect x="58" y="20" width="4" height="4"/><rect x="70" y="20" width="4" height="4"/>
+                <rect x="4" y="30" width="4" height="4"/><rect x="16" y="30" width="4" height="4"/><rect x="24" y="30" width="4" height="4"/><rect x="32" y="30" width="4" height="4"/><rect x="44" y="30" width="4" height="4"/><rect x="52" y="30" width="4" height="4"/><rect x="60" y="30" width="4" height="4"/><rect x="72" y="30" width="4" height="4"/><rect x="84" y="30" width="4" height="4"/><rect x="92" y="30" width="4" height="4"/>
+                <rect x="8" y="38" width="4" height="4"/><rect x="20" y="38" width="4" height="4"/><rect x="28" y="38" width="4" height="4"/><rect x="36" y="38" width="4" height="4"/><rect x="48" y="38" width="4" height="4"/><rect x="56" y="38" width="4" height="4"/><rect x="68" y="38" width="4" height="4"/><rect x="80" y="38" width="4" height="4"/><rect x="88" y="38" width="4" height="4"/>
+                <rect x="4" y="46" width="4" height="4"/><rect x="12" y="46" width="4" height="4"/><rect x="20" y="46" width="4" height="4"/><rect x="32" y="46" width="4" height="4"/><rect x="40" y="46" width="4" height="4"/><rect x="52" y="46" width="4" height="4"/><rect x="64" y="46" width="4" height="4"/><rect x="76" y="46" width="4" height="4"/><rect x="84" y="46" width="4" height="4"/><rect x="92" y="46" width="4" height="4"/>
+                <rect x="8" y="54" width="4" height="4"/><rect x="24" y="54" width="4" height="4"/><rect x="36" y="54" width="4" height="4"/><rect x="44" y="54" width="4" height="4"/><rect x="56" y="54" width="4" height="4"/><rect x="68" y="54" width="4" height="4"/><rect x="80" y="54" width="4" height="4"/>
+                <rect x="16" y="62" width="4" height="4"/><rect x="28" y="62" width="4" height="4"/><rect x="40" y="62" width="4" height="4"/><rect x="48" y="62" width="4" height="4"/><rect x="60" y="62" width="4" height="4"/><rect x="72" y="62" width="4" height="4"/><rect x="88" y="62" width="4" height="4"/>
+                <rect x="4" y="70" width="4" height="4"/><rect x="20" y="70" width="4" height="4"/><rect x="32" y="70" width="4" height="4"/><rect x="44" y="70" width="4" height="4"/><rect x="52" y="70" width="4" height="4"/><rect x="64" y="70" width="4" height="4"/><rect x="76" y="70" width="4" height="4"/><rect x="84" y="70" width="4" height="4"/><rect x="92" y="70" width="4" height="4"/>
+                <rect x="30" y="80" width="4" height="4"/><rect x="42" y="80" width="4" height="4"/><rect x="50" y="80" width="4" height="4"/><rect x="62" y="80" width="4" height="4"/><rect x="70" y="80" width="4" height="4"/><rect x="84" y="80" width="4" height="4"/>
+                <rect x="34" y="88" width="4" height="4"/><rect x="46" y="88" width="4" height="4"/><rect x="54" y="88" width="4" height="4"/><rect x="66" y="88" width="4" height="4"/><rect x="74" y="88" width="4" height="4"/><rect x="84" y="88" width="4" height="4"/><rect x="92" y="88" width="4" height="4"/>
+              </g>
+              <!-- center brand mark -->
+              <rect x="40" y="40" width="20" height="20" fill="#fff"/>
+              <g transform="translate(40, 40) scale(0.625)" stroke-linejoin="miter">
+                <path d="M6 24 L16 6 L26 24" fill="none" stroke="#0A0F1C" stroke-width="3"/>
+                <path d="M11 24 L16 14 L21 24" fill="none" stroke="#FF5B49" stroke-width="3"/>
+              </g>
+            </svg>
+          </div>
+          <div style="text-align:center; font-size: 9px; color: #6F8195; font-family: var(--font-mono); margin-bottom: 8px;">
+            TOKEN · Z4-K9P-LM2X<br>VALID 24 SEC
+          </div>
+
+          <div class="tg-buttons">
+            <div class="tg-btn">📋 My plan</div>
+            <div class="tg-btn" style="background: #FF5B49;">🎫 Refresh</div>
+            <div class="tg-btn">📊 History</div>
+            <div class="tg-btn">❓ Help</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-text">End of mockup · v1.0 admin console · for internal review</div>
+  </footer>
+
+</div>
+</body>
+</html>

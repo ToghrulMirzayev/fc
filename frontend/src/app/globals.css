@@ -1,0 +1,166 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────
+   THEME TOKENS — Fitness Court palette
+   Accent: warm orange (#FF5722, the barbell plate color)
+   Anchor: deep black (the barbell shaft)
+   Light surface: warm off-white (the logo background)
+
+   All UI colors are CSS variables. Components read these
+   via Tailwind utility classes — never hardcode hex.
+   ───────────────────────────────────────────────────────── */
+
+:root,
+[data-theme="dark"] {
+  /* Surfaces — true blacks with subtle warmth */
+  --color-ink: #0d0d0d;
+  --color-base: #131313;
+  --color-elev: #1a1a1a;
+  --color-card: #1c1c1c;
+  --color-card-hover: #232323;
+
+  /* Text on dark */
+  --color-text-primary: #f5f1ea;
+  --color-text-secondary: #b8b4ad;
+  --color-text-tertiary: #8a8680;
+  --color-text-dim: #5a5650;
+
+  /* Borders */
+  --color-border-subtle: rgba(245, 241, 234, 0.08);
+  --color-border-strong: rgba(245, 241, 234, 0.16);
+
+  /* Brand accent — orange plate */
+  --color-accent: #ff5722;
+  --color-accent-dim: #d44615;
+  --color-accent-soft: rgba(255, 87, 34, 0.14);
+
+  /* Secondary semantic colors */
+  --color-ozone: #b8e055;
+  --color-ozone-dim: #98bc2c;
+  --color-ozone-soft: rgba(184, 224, 85, 0.14);
+
+  --color-ice: #6fa8ff;
+  --color-ice-soft: rgba(111, 168, 255, 0.14);
+
+  --color-warning: #ffb547;
+  --color-warning-soft: rgba(255, 181, 71, 0.14);
+
+  --color-danger: #ff5470;
+  --color-danger-soft: rgba(255, 84, 112, 0.14);
+
+  /* Inputs */
+  --color-input-bg: #131313;
+  --color-input-border: rgba(245, 241, 234, 0.1);
+}
+
+[data-theme="light"] {
+  /* Surfaces — warm off-white matching the brand sheet color */
+  --color-ink: #f0ebe1;
+  --color-base: #f7f3eb;
+  --color-elev: #ebe5d8;
+  --color-card: #fbf8f1;
+  --color-card-hover: #f1ebde;
+
+  /* Text on light — deep black for max contrast */
+  --color-text-primary: #0d0d0d;
+  --color-text-secondary: #3a3530;
+  --color-text-tertiary: #6b655c;
+  --color-text-dim: #9a948a;
+
+  /* Borders */
+  --color-border-subtle: rgba(13, 13, 13, 0.08);
+  --color-border-strong: rgba(13, 13, 13, 0.18);
+
+  /* Brand accent — same orange (it pops on both themes) */
+  --color-accent: #e0461a;
+  --color-accent-dim: #b53612;
+  --color-accent-soft: rgba(224, 70, 26, 0.1);
+
+  --color-ozone: #6b9a1a;
+  --color-ozone-dim: #547a14;
+  --color-ozone-soft: rgba(107, 154, 26, 0.12);
+
+  --color-ice: #2e6dd6;
+  --color-ice-soft: rgba(46, 109, 214, 0.1);
+
+  --color-warning: #c88010;
+  --color-warning-soft: rgba(200, 128, 16, 0.12);
+
+  --color-danger: #d83a55;
+  --color-danger-soft: rgba(216, 58, 85, 0.1);
+
+  --color-input-bg: #fbf8f1;
+  --color-input-border: rgba(13, 13, 13, 0.12);
+}
+
+@layer base {
+  html,
+  body {
+    background-color: var(--color-ink);
+    color: var(--color-text-primary);
+    font-family:
+      "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-feature-settings: "cv11" 1, "tnum" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    min-height: 100vh;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font-family: inherit;
+    color: inherit;
+  }
+}
+
+@layer components {
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-sm px-2 py-1 font-mono text-xs uppercase tracking-caps font-medium;
+  }
+  .pill::before {
+    content: "";
+    @apply h-1.5 w-1.5 rounded-full;
+    background: currentColor;
+  }
+  .pill-active {
+    color: var(--color-ozone);
+    background: var(--color-ozone-soft);
+  }
+  .pill-frozen {
+    color: var(--color-ice);
+    background: var(--color-ice-soft);
+  }
+  .pill-expired {
+    color: var(--color-danger);
+    background: var(--color-danger-soft);
+  }
+  .pill-trial,
+  .pill-pending {
+    color: var(--color-warning);
+    background: var(--color-warning-soft);
+  }
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-subtle);
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-strong);
+}
