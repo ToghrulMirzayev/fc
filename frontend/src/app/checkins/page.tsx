@@ -185,8 +185,8 @@ export default function CheckinsPage() {
         />
       )}
 
-      <div className="grid grid-cols-[340px_1fr] gap-6">
-        <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-lg border border-subtle bg-elev p-6">
+      <div className="flex flex-col gap-6">
+        <div className="relative mx-auto flex w-full max-w-sm flex-col items-center justify-center overflow-hidden rounded-lg border border-subtle bg-elev p-6">
           <div className="relative mb-5 h-56 w-56 overflow-hidden rounded-md border border-subtle bg-base">
             <div className="pointer-events-none absolute inset-3">
               <div className="absolute left-0 top-0 h-6 w-6 rounded-tl-sm border-2 border-b-0 border-r-0 border-coral" />

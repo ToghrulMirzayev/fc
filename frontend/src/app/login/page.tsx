@@ -24,7 +24,7 @@ export default function WorkspacePage() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const clean = slug.trim().toLowerCase();
+    const clean = slug.trim().toLowerCase().replace(/\s+/g, "-");
     if (!clean) return;
     setError(null);
     setPending(true);
@@ -71,7 +71,7 @@ export default function WorkspacePage() {
           </h1>
           <p className="mt-3 text-md text-secondary">
             Enter the name of your gym's workspace. It's the part before
-            <span className="font-mono text-primary"> .{appName().toLowerCase()}.com</span>.
+            <span className="font-mono text-primary"> .{appName().toLowerCase().replace(/\s+/g, "-")}.com</span>.
           </p>
 
           <form onSubmit={onSubmit} className="mt-8 space-y-4">
@@ -89,7 +89,7 @@ export default function WorkspacePage() {
                   className="flex-1 bg-transparent px-3.5 py-2.5 text-md text-primary placeholder:text-tertiary focus:outline-none"
                 />
                 <span className="border-l border-subtle px-3 py-2.5 font-mono text-sm text-tertiary">
-                  .{appName().toLowerCase()}.com
+                  .{appName().toLowerCase().replace(/\s+/g, "-")}.com
                 </span>
               </div>
             </div>
