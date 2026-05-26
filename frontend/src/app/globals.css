@@ -37,6 +37,8 @@
   --color-accent: #ff5722;
   --color-accent-dim: #d44615;
   --color-accent-soft: rgba(255, 87, 34, 0.14);
+  --color-coral: var(--color-accent);
+  --color-coral-dim: var(--color-accent-dim);
 
   /* Secondary semantic colors */
   --color-ozone: #b8e055;
@@ -79,6 +81,8 @@
   --color-accent: #e0461a;
   --color-accent-dim: #b53612;
   --color-accent-soft: rgba(224, 70, 26, 0.1);
+  --color-coral: var(--color-accent);
+  --color-coral-dim: var(--color-accent-dim);
 
   --color-ozone: #6b9a1a;
   --color-ozone-dim: #547a14;

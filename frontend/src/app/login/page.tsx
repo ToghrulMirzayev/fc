@@ -63,9 +63,6 @@ export default function WorkspacePage() {
 
       <main className="flex flex-1 items-center justify-center px-6">
         <div className="w-full max-w-md">
-          <div className="mb-2 font-mono text-xs uppercase tracking-caps text-coral">
-            Step 1 of 2
-          </div>
           <h1 className="text-3xl font-semibold tracking-tight text-primary">
             Find your workspace
           </h1>
