@@ -1,92 +1,32 @@
-name: CI
+name: Deploy
 
 on:
   push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
+    branches: [main]
 
 jobs:
-  backend:
+  deploy:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: fitnesscourt
-          POSTGRES_PASSWORD: fitnesscourt
-          POSTGRES_DB: fitnesscourt_test
-        ports: ["5432:5432"]
-        options: >-
-          --health-cmd "pg_isready -U fitnesscourt"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 5
-      redis:
-        image: redis:7-alpine
-        ports: ["6379:6379"]
 
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          python-version: "3.12"
-          cache: pip
+          host: ${{ secrets.SSH_HOST }}
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/fc
 
-      - name: Install
-        working-directory: ./backend
-        run: |
-          pip install --upgrade pip
-          pip install -e ".[dev]"
+            echo "Pull latest code"
+            git pull origin main
 
-      - name: Lint
-        working-directory: ./backend
-        run: ruff check .
+            echo "Rebuild containers"
+            docker compose down -v
+            docker compose up -d --build
 
-      - name: Format check
-        working-directory: ./backend
-        run: ruff format --check .
+            echo "Run migrations"
+            docker compose exec -T api alembic upgrade head
 
-      - name: Type check
-        working-directory: ./backend
-        run: mypy app
-
-      - name: Test
-        working-directory: ./backend
-        env:
-          SECRET_KEY: ${{ '0123456789abcdef0123456789abcdef' }}
-          QR_SIGNING_KEY: ${{ 'fedcba9876543210fedcba9876543210' }}
-          DATABASE_URL: postgresql+asyncpg://fitnesscourt:fitnesscourt@localhost:5432/fitnesscourt_test
-          REDIS_URL: redis://localhost:6379/0
-        run: pytest -v
-
-  frontend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install
-        working-directory: ./frontend
-        run: npm ci || npm install
-
-      - name: Lint
-        working-directory: ./frontend
-        run: npm run lint
-
-      - name: Type check
-        working-directory: ./frontend
-        run: npm run type-check
-
-      - name: Build
-        working-directory: ./frontend
-        env:
-          NEXT_PUBLIC_API_URL: http://localhost:8000
-          NEXT_PUBLIC_APP_NAME: Fitness Court
-        run: npm run build
+            echo "Run seed"
+            docker compose exec -T api python -m app.scripts.seed_dev
