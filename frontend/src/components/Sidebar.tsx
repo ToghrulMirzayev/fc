@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 import { Logo } from "./Logo";
 import { ThemeToggle } from "./ThemeToggle";
@@ -16,7 +16,6 @@ import {
   IconSchedule,
   IconSettings,
 } from "./icons";
-import { tokens } from "@/lib/api";
 import { useAuth } from "@/lib/useAuth";
 
 type NavItem = {
@@ -65,17 +64,11 @@ function initialsOf(name: string): string {
 
 export function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
   const { user } = useAuth();
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
     return pathname === href || pathname.startsWith(`${href}/`);
-  };
-
-  const logout = () => {
-    tokens.clear();
-    router.replace("/login");
   };
 
   return (
@@ -127,9 +120,8 @@ export function Sidebar() {
       <div className="mt-auto space-y-2">
         <ThemeToggle />
         {user && (
-          <button
-            type="button"
-            onClick={logout}
+          <Link
+            href="/profile"
             className="flex w-full items-center gap-2.5 rounded-md border border-subtle bg-card p-2.5 text-left transition-colors hover:bg-card-hover"
           >
             <div
@@ -146,10 +138,10 @@ export function Sidebar() {
                 {user.full_name}
               </div>
               <div className="font-mono text-xs text-tertiary">
-                {user.role} · sign out
+                {user.role} · view profile
               </div>
             </div>
-          </button>
+          </Link>
         )}
       </div>
     </aside>

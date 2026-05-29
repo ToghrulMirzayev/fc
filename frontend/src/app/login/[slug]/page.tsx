@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { Eye, EyeOff } from "lucide-react";
+
 import { Logo } from "@/components/Logo";
 import { api, login } from "@/lib/api";
 
@@ -27,6 +29,7 @@ export default function CredentialsPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -95,9 +98,6 @@ export default function CredentialsPage() {
 
       <main className="flex flex-1 items-center justify-center px-6">
         <div className="w-full max-w-md">
-          <div className="mb-2 font-mono text-xs uppercase tracking-caps text-coral">
-            Step 2 of 2
-          </div>
           {workspace ? (
             <>
               <h1 className="text-3xl font-semibold tracking-tight text-primary">
@@ -132,15 +132,25 @@ export default function CredentialsPage() {
               <label className="mb-2 block font-mono text-xs uppercase tracking-caps text-tertiary">
                 Password
               </label>
-              <input
-                required
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-md border border-input bg-input-bg px-3.5 py-2.5 text-md text-primary placeholder:text-tertiary focus:border-coral focus:outline-none"
-                placeholder="••••••••"
-              />
+              <div className="flex items-center rounded-md border border-input bg-input-bg focus-within:border-coral">
+                <input
+                  required
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="flex-1 bg-transparent px-3.5 py-2.5 text-md text-primary placeholder:text-tertiary focus:outline-none"
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="flex items-center justify-center px-3 text-tertiary hover:text-primary focus:outline-none"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+                </button>
+              </div>
             </div>
 
             {error && (

@@ -51,7 +51,19 @@ logs/
 data/
 uploads/
 backups/
+celerybeat-schedule*
+
 
 # Build artifacts
 *.pyc
 *.pyo
+*.tsbuildinfo
+
+
+# Local developer guides
+START.md
+
+# Local symlinks
+alembic
+
+
