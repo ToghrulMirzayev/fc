@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_current_user
+from app.core.features import resolve_features
 from app.db.session import get_session
 from app.models.tenant import Tenant
 from app.models.user import User
@@ -48,6 +49,7 @@ async def me_endpoint(
     db: AsyncSession = Depends(get_session),
 ) -> CurrentUserOut:
     tenant = await db.get(Tenant, user.tenant_id) if user.tenant_id else None
+    features = await resolve_features(db, user.tenant_id)
     return CurrentUserOut(
         id=user.id,
         email=user.email,
@@ -56,4 +58,5 @@ async def me_endpoint(
         tenant_id=user.tenant_id,
         tenant_slug=tenant.slug if tenant else None,
         tenant_name=tenant.name if tenant else None,
+        features=features,
     )

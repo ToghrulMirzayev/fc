@@ -22,6 +22,9 @@ type NavItem = {
   href: string;
   label: string;
   icon: (props: { size?: number }) => React.JSX.Element;
+  // Feature gate key. Items with no `feature` are basics (always shown).
+  // Items whose feature resolves to false are hidden entirely.
+  feature?: string;
 };
 
 const NAV_GROUPS: Array<{ label: string; items: NavItem[] }> = [
@@ -31,7 +34,12 @@ const NAV_GROUPS: Array<{ label: string; items: NavItem[] }> = [
       { href: "/", label: "Dashboard", icon: IconDashboard },
       { href: "/members", label: "Members", icon: IconMembers },
       { href: "/checkins", label: "Check-ins", icon: IconCheckins },
-      { href: "/bookings", label: "Bookings", icon: IconBookings },
+      {
+        href: "/bookings",
+        label: "Bookings",
+        icon: IconBookings,
+        feature: "bookings",
+      },
     ],
   },
   {
@@ -39,7 +47,12 @@ const NAV_GROUPS: Array<{ label: string; items: NavItem[] }> = [
     items: [
       { href: "/plans", label: "Plans", icon: IconPlans },
       { href: "/payments", label: "Payments", icon: IconPayments },
-      { href: "/schedule", label: "Schedule", icon: IconSchedule },
+      {
+        href: "/schedule",
+        label: "Schedule",
+        icon: IconSchedule,
+        feature: "bookings",
+      },
     ],
   },
   {
@@ -49,6 +62,7 @@ const NAV_GROUPS: Array<{ label: string; items: NavItem[] }> = [
         href: "/notifications",
         label: "Notifications",
         icon: IconNotifications,
+        feature: "telegram_automation",
       },
       { href: "/configuration", label: "Configuration", icon: IconSettings },
     ],
@@ -65,11 +79,21 @@ function initialsOf(name: string): string {
 export function Sidebar() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const features = user?.features ?? {};
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
     return pathname === href || pathname.startsWith(`${href}/`);
   };
+
+  // Hide any nav item gated behind a feature that isn't enabled, then
+  // drop groups that end up empty.
+  const visibleGroups = NAV_GROUPS.map((group) => ({
+    ...group,
+    items: group.items.filter(
+      (item) => !item.feature || features[item.feature] === true,
+    ),
+  })).filter((group) => group.items.length > 0);
 
   return (
     <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-subtle bg-base px-4 py-6">
@@ -83,7 +107,7 @@ export function Sidebar() {
       </div>
 
       <nav className="flex-1 overflow-y-auto">
-        {NAV_GROUPS.map((group) => (
+        {visibleGroups.map((group) => (
           <div key={group.label} className="mb-5">
             <div className="px-2 pb-2 font-mono text-xs uppercase tracking-capsxl text-dim">
               {group.label}
