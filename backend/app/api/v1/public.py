@@ -76,11 +76,16 @@ async def billing_plans_endpoint() -> dict:
             {
                 "tier": p.tier.value,
                 "name": p.name,
+                "tagline": p.tagline,
                 "monthly_price_eur": p.monthly_price_eur,
                 "member_cap": p.member_cap,
+                "admin_seats": p.admin_seats,
                 "branches": p.branches,
                 "features": list(p.features),
                 "is_custom": p.is_custom,
+                "is_trial": p.is_trial,
+                "trial_days": p.trial_days,
+                "highlight": p.highlight,
             }
             for p in BILLING_PLANS
         ]

@@ -6,6 +6,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: copy.appFullTitle(),
   description: "Modern multi-tenant SaaS for gyms and fitness studios.",
+  icons: {
+    icon: [{ url: "/favicon.ico?v=5", sizes: "any" }],
+    shortcut: "/favicon.ico?v=5",
+  },
 };
 
 /**

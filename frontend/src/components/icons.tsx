@@ -143,3 +143,11 @@ export function IconFilter({ size = 14, className }: IconProps) {
     </svg>
   );
 }
+
+export function IconX({ size = 16, className }: IconProps) {
+  return (
+    <svg {...base(size, className)} strokeWidth={2}>
+      <path d="M18 6 6 18M6 6l12 12" />
+    </svg>
+  );
+}

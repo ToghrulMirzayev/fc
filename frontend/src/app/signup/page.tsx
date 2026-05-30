@@ -10,11 +10,16 @@ import { appName } from "@/lib/branding";
 type BillingPlan = {
   tier: string;
   name: string;
+  tagline: string;
   monthly_price_eur: number;
   member_cap: number | null;
+  admin_seats: number | null;
   branches: number | null;
   features: string[];
   is_custom: boolean;
+  is_trial: boolean;
+  trial_days: number | null;
+  highlight: boolean;
 };
 
 type Discount = {
@@ -164,68 +169,111 @@ export default function SignupPage() {
         </div>
 
         {/* Pricing tiers */}
-        <div className="mb-16 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
-          {plans.map((p) => (
-            <button
-              key={p.tier}
-              type="button"
-              onClick={() => setSelectedTier(p.tier)}
-              className={[
-                "rounded-md border p-4 text-left transition-colors",
-                selectedTier === p.tier
-                  ? "border-coral bg-coral-soft"
-                  : "border-subtle bg-card hover:border-strong",
-              ].join(" ")}
-            >
-              <div className="mb-2 flex items-center justify-between">
-                <div className="font-mono text-xs uppercase tracking-caps text-tertiary">
-                  {p.name}
+        <div className="mb-6">
+          <h2 className="text-2xl font-semibold tracking-tight text-primary">
+            Plans for studio owners
+          </h2>
+          <p className="mt-1 max-w-3xl text-md text-secondary">
+            Every plan starts with a free 14-day trial — no card required. Tiers
+            scale on admin & trainer seats, locations, AI insights, Telegram
+            automation, and access-control hardware, not just member count.
+          </p>
+        </div>
+
+        <div className="mb-16 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {plans.map((p) => {
+            const selected = selectedTier === p.tier;
+            const cap =
+              p.member_cap === null
+                ? "Unlimited"
+                : p.member_cap.toLocaleString();
+            const seats =
+              p.admin_seats === null ? "Unlimited" : String(p.admin_seats);
+            const locations =
+              p.branches === null ? "Unlimited" : String(p.branches);
+            return (
+              <button
+                key={p.tier}
+                type="button"
+                onClick={() => setSelectedTier(p.tier)}
+                className={[
+                  "relative flex flex-col rounded-md border p-5 text-left transition-colors",
+                  selected
+                    ? "border-coral bg-coral-soft"
+                    : p.highlight
+                      ? "border-coral/40 bg-card hover:border-coral"
+                      : "border-subtle bg-card hover:border-strong",
+                ].join(" ")}
+              >
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <div className="font-mono text-xs uppercase tracking-caps text-tertiary">
+                    {p.name}
+                  </div>
+                  {p.highlight ? (
+                    <span className="rounded-sm bg-coral-soft px-1.5 py-0.5 font-mono text-2xs uppercase tracking-caps text-coral">
+                      Most popular
+                    </span>
+                  ) : p.is_trial ? (
+                    <span className="rounded-sm bg-ozone-soft px-1.5 py-0.5 font-mono text-2xs uppercase tracking-caps text-ozone">
+                      {p.trial_days}-day trial
+                    </span>
+                  ) : p.is_custom ? (
+                    <span className="rounded-sm bg-elev px-1.5 py-0.5 font-mono text-2xs uppercase tracking-caps text-tertiary">
+                      Custom
+                    </span>
+                  ) : null}
                 </div>
-                {p.tier === "free" && (
-                  <span className="rounded-sm bg-ozone-soft px-1.5 py-0.5 font-mono text-2xs uppercase tracking-caps text-ozone">
-                    Start free
-                  </span>
-                )}
-              </div>
-              <div className="text-2xl font-semibold tabular-nums text-primary">
-                {p.is_custom ? (
-                  <span className="text-lg text-tertiary">Contact us</span>
-                ) : p.monthly_price_eur === 0 ? (
-                  <>
-                    €0
-                    <span className="ml-1 text-sm font-normal text-tertiary">
-                      forever
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    €{p.monthly_price_eur}
-                    <span className="ml-1 text-sm font-normal text-tertiary">
-                      /mo
-                    </span>
-                  </>
-                )}
-              </div>
-              <ul className="mt-3 space-y-1 text-sm">
-                {p.member_cap !== null && (
-                  <li className="text-secondary">
-                    Up to {p.member_cap.toLocaleString()} members
-                  </li>
-                )}
-                {p.member_cap === null && !p.is_custom && (
-                  <li className="text-secondary">Unlimited members</li>
-                )}
-                {p.branches && (
-                  <li className="text-secondary">{p.branches} branches</li>
-                )}
-                {p.features.slice(0, 2).map((f) => (
-                  <li key={f} className="text-tertiary">
-                    · {f}
-                  </li>
-                ))}
-              </ul>
-            </button>
-          ))}
+
+                <div className="text-2xl font-semibold tabular-nums text-primary">
+                  {p.is_custom ? (
+                    <span className="text-lg text-tertiary">Let's talk</span>
+                  ) : p.is_trial ? (
+                    <>
+                      Free
+                      <span className="ml-1.5 text-sm font-normal text-tertiary">
+                        for {p.trial_days} days
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      €{p.monthly_price_eur}
+                      <span className="ml-1 text-sm font-normal text-tertiary">
+                        /mo
+                      </span>
+                    </>
+                  )}
+                </div>
+
+                <p className="mt-2 text-sm text-secondary">{p.tagline}</p>
+
+                <div className="mt-4 grid grid-cols-3 gap-2 border-y border-subtle py-3 text-center">
+                  {[
+                    ["Members", cap],
+                    ["Seats", seats],
+                    ["Locations", locations],
+                  ].map(([label, value]) => (
+                    <div key={label}>
+                      <div className="text-sm font-semibold tabular-nums text-primary">
+                        {value}
+                      </div>
+                      <div className="mt-0.5 font-mono text-2xs uppercase tracking-caps text-tertiary">
+                        {label}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <ul className="mt-4 space-y-1.5 text-sm">
+                  {p.features.map((f) => (
+                    <li key={f} className="flex gap-2 text-secondary">
+                      <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-coral" />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </button>
+            );
+          })}
         </div>
 
         {/* Signup form */}
