@@ -53,6 +53,9 @@ export default function MemberProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showAssign, setShowAssign] = useState(false);
+  const [showFreeze, setShowFreeze] = useState(false);
+  const [freezeDays, setFreezeDays] = useState(14);
+  const [freezeReason, setFreezeReason] = useState("");
 
   const { data: member } = useQuery({
     queryKey: ["member", memberId],
@@ -100,12 +103,16 @@ export default function MemberProfilePage() {
   });
 
   const freezeMutation = useMutation({
-    mutationFn: (endsOn: string) =>
+    mutationFn: (args: { endsOn: string; reason: string | null }) =>
       api(`/api/v1/members/${memberId}/freeze`, {
         method: "POST",
-        body: JSON.stringify({ ends_on: endsOn }),
+        body: JSON.stringify({ ends_on: args.endsOn, reason: args.reason }),
       }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["member", memberId] }),
+    onSuccess: () => {
+      setShowFreeze(false);
+      setError(null);
+      qc.invalidateQueries({ queryKey: ["member", memberId] });
+    },
     onError: (e: Error) =>
       setError(e instanceof ApiError ? e.detail || e.message : e.message),
   });
@@ -152,7 +159,11 @@ export default function MemberProfilePage() {
                 variant="primary"
                 onClick={() => setShowAssign(!showAssign)}
               >
-                {showAssign ? "Cancel" : "Assign plan"}
+                {showAssign
+                  ? "Cancel"
+                  : m.status === "expired"
+                    ? "Renew"
+                    : "Assign plan"}
               </Button>
             )}
             {am && !am.is_paid && (
@@ -163,15 +174,7 @@ export default function MemberProfilePage() {
             {am?.status === "frozen" ? (
               <Button onClick={() => resumeMutation.mutate()}>Resume</Button>
             ) : am?.is_paid ? (
-              <Button
-                onClick={() => {
-                  const d = new Date();
-                  d.setDate(d.getDate() + 14);
-                  freezeMutation.mutate(d.toISOString().slice(0, 10));
-                }}
-              >
-                Freeze 14d
-              </Button>
+              <Button onClick={() => setShowFreeze(true)}>Freeze</Button>
             ) : null}
             <Button onClick={() => linkingMutation.mutate()}>
               {m.telegram_user_id ? "Re-link Telegram" : "Link Telegram"}
@@ -208,7 +211,7 @@ export default function MemberProfilePage() {
       {showAssign && (
         <div className="mb-4 rounded-md border border-coral/30 bg-card p-4">
           <div className="mb-3 font-mono text-xs uppercase tracking-caps text-tertiary">
-            Choose a plan
+            {m.status === "expired" ? "Renew — choose a plan" : "Choose a plan"}
           </div>
           <div className="grid grid-cols-2 gap-3">
             {plansData?.map((p) => (
@@ -231,6 +234,94 @@ export default function MemberProfilePage() {
                 No plans yet. Create one from the Plans page.
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {showFreeze && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setShowFreeze(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-md border border-subtle bg-card p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="font-mono text-xs uppercase tracking-caps text-tertiary">
+              Freeze membership
+            </div>
+            <div className="mt-1 text-xl font-semibold text-primary">
+              Choose freeze duration
+            </div>
+            <p className="mt-2 text-md text-secondary">
+              The membership is paused and the expiry date is pushed back by the
+              same number of days, so no paid time is lost.
+            </p>
+
+            <div className="mt-5 grid grid-cols-4 gap-2">
+              {[7, 14, 30, 60].map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => setFreezeDays(d)}
+                  className={`rounded-md border px-2 py-2 text-md font-medium transition-colors ${
+                    freezeDays === d
+                      ? "border-coral bg-coral-soft text-coral"
+                      : "border-subtle bg-elev text-secondary hover:border-coral"
+                  }`}
+                >
+                  {d}d
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-4">
+              <label className="font-mono text-xs uppercase tracking-caps text-tertiary">
+                Custom days
+              </label>
+              <input
+                type="number"
+                min={1}
+                max={365}
+                value={freezeDays}
+                onChange={(e) =>
+                  setFreezeDays(Math.max(1, Number(e.target.value) || 1))
+                }
+                className="mt-1 w-full rounded-md border border-subtle bg-elev px-3 py-2 text-primary outline-none focus:border-coral"
+              />
+            </div>
+
+            <div className="mt-4">
+              <label className="font-mono text-xs uppercase tracking-caps text-tertiary">
+                Reason (optional)
+              </label>
+              <input
+                type="text"
+                value={freezeReason}
+                onChange={(e) => setFreezeReason(e.target.value)}
+                placeholder="e.g. travel, injury"
+                className="mt-1 w-full rounded-md border border-subtle bg-elev px-3 py-2 text-primary outline-none focus:border-coral"
+              />
+            </div>
+
+            <div className="mt-6 flex justify-end gap-2">
+              <Button onClick={() => setShowFreeze(false)}>Cancel</Button>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  const d = new Date();
+                  d.setDate(d.getDate() + freezeDays);
+                  freezeMutation.mutate({
+                    endsOn: d.toISOString().slice(0, 10),
+                    reason: freezeReason.trim() || null,
+                  });
+                }}
+              >
+                {freezeMutation.isPending
+                  ? "Freezing…"
+                  : `Freeze for ${freezeDays}d`}
+              </Button>
+            </div>
           </div>
         </div>
       )}

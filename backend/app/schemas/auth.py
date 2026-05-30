@@ -28,3 +28,6 @@ class CurrentUserOut(BaseModel):
     tenant_id: UUID | None
     tenant_slug: str | None
     tenant_name: str | None
+    # Resolved feature gates for this tenant: {feature_key: enabled}.
+    # The frontend hides any section/action whose key is False or absent.
+    features: dict[str, bool] = {}

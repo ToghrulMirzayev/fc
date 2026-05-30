@@ -27,6 +27,7 @@ from app.services.freeze import FreezeError, freeze_membership, resume_membershi
 from app.services.linking import create_linking_code
 from app.services.member import (
     assign_plan,
+    compute_member_status,
     create_member,
     get_active_membership,
     initials_of,
@@ -262,6 +263,9 @@ async def freeze_endpoint(
         )
     except FreezeError as e:
         raise HTTPException(status_code=400, detail=e.code)
+    # Keep the denormalized member.status in sync so the UI updates
+    # immediately instead of waiting for the daily recompute task.
+    member.status = compute_member_status(membership)
     return {"freeze_period_id": str(period.id)}
 
 
@@ -279,6 +283,7 @@ async def resume_endpoint(
         await resume_membership(db, membership, user.id)
     except FreezeError as e:
         raise HTTPException(status_code=400, detail=e.code)
+    member.status = compute_member_status(membership)
     return {"ok": True}
 
 

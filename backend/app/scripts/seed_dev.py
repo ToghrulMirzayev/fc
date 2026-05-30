@@ -252,6 +252,29 @@ async def seed() -> None:
             )
         )
 
+        # ─── Per-tenant feature gates for the demo workspace ───
+        # Defaults (in app/core/features.py) already turn the basics on.
+        # Here we explicitly enable a couple of gated sections so the demo
+        # shows the gating in action: Bookings/Schedule appear, but
+        # Notifications (Telegram automation), AI and access-control stay
+        # hidden until upgraded.
+        demo_gates = {
+            "bookings": True,
+            "analytics": True,
+            "telegram_automation": False,
+            "ai_insights": False,
+            "access_control": False,
+        }
+        for key, enabled in demo_gates.items():
+            db.add(
+                FeatureFlag(
+                    tenant_id=tenant.id,
+                    key=key,
+                    enabled=enabled,
+                    description=f"Demo gate for '{key}'.",
+                )
+            )
+
         await db.commit()
         print("Seed complete.")
         print()

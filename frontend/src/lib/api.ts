@@ -133,14 +133,18 @@ export async function login(email: string, password: string) {
   return data;
 }
 
+export type CurrentUser = {
+  id: string;
+  email: string;
+  full_name: string;
+  role: string;
+  tenant_id: string | null;
+  tenant_slug: string | null;
+  tenant_name: string | null;
+  // Resolved feature gates for this tenant: { feature_key: enabled }.
+  features: Record<string, boolean>;
+};
+
 export async function fetchMe() {
-  return api<{
-    id: string;
-    email: string;
-    full_name: string;
-    role: string;
-    tenant_id: string | null;
-    tenant_slug: string | null;
-    tenant_name: string | null;
-  }>("/api/v1/auth/me");
+  return api<CurrentUser>("/api/v1/auth/me");
 }
