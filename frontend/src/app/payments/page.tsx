@@ -1,18 +1,36 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Lock } from "lucide-react";
 
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { api, ApiError } from "@/lib/api";
+import { invalidateMemberData } from "@/lib/invalidate";
 import { useAuth } from "@/lib/useAuth";
+
+type UpgradeInfo = {
+  required_tier: string;
+  plan_name: string;
+  monthly_price_eur: number;
+  discounted_price_eur: number;
+  discount_percent: number;
+  discount_label: string | null;
+};
 
 type PaymentMethod = {
   key: string;
   label: string;
-  operational: boolean;
   description: string;
+  operational: boolean;
+  upgrade: UpgradeInfo | null;
+};
+
+type MethodsResponse = {
+  current_tier: string;
+  discount: { percent: number; label: string | null } | null;
+  methods: PaymentMethod[];
 };
 
 type LookupResult =
@@ -46,10 +64,11 @@ type LookupResult =
 export default function PaymentsPage() {
   const { user, isLoading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("cash");
+  const [upgradeMethod, setUpgradeMethod] = useState<PaymentMethod | null>(null);
 
   const { data: methodsData } = useQuery({
     queryKey: ["payment-methods"],
-    queryFn: () => api<{ methods: PaymentMethod[] }>("/api/v1/payments/methods"),
+    queryFn: () => api<MethodsResponse>("/api/v1/payments/methods"),
     enabled: !!user,
   });
 
@@ -64,50 +83,201 @@ export default function PaymentsPage() {
   const methods = methodsData?.methods ?? [];
   const current = methods.find((m) => m.key === activeTab);
 
+  const handleTabClick = (m: PaymentMethod) => {
+    if (m.operational) {
+      setActiveTab(m.key);
+    } else {
+      // Locked on the current plan — offer the upgrade instead.
+      setUpgradeMethod(m);
+    }
+  };
+
   return (
     <AppShell>
       <PageHeader crumbs={["Catalog", "Payments"]} title="Record payment" />
 
       <div className="mb-6 flex gap-1 rounded-md border border-subtle bg-card p-1">
-        {methods.map((m) => (
-          <button
-            key={m.key}
-            type="button"
-            onClick={() => setActiveTab(m.key)}
-            className={[
-              "flex-1 rounded-sm px-4 py-2.5 text-md font-medium transition-colors",
-              activeTab === m.key
-                ? "bg-coral text-white"
-                : m.operational
-                ? "text-secondary hover:text-primary hover:bg-elev"
-                : "text-tertiary hover:text-secondary hover:bg-elev",
-            ].join(" ")}
-          >
-            <span className="flex items-center justify-center gap-1.5">
-              {m.label}
-              {!m.operational && (
-                <span
-                  className={[
-                    "rounded-sm px-1.5 py-0.5 font-mono text-2xs uppercase tracking-caps",
-                    activeTab === m.key
-                      ? "bg-white/20 text-white"
-                      : "bg-elev text-tertiary",
-                  ].join(" ")}
-                >
-                  soon
-                </span>
-              )}
-            </span>
-          </button>
-        ))}
+        {methods.map((m) => {
+          const isActive = m.operational && activeTab === m.key;
+          return (
+            <button
+              key={m.key}
+              type="button"
+              onClick={() => handleTabClick(m)}
+              aria-disabled={!m.operational}
+              title={
+                m.operational
+                  ? undefined
+                  : `Available on the ${m.upgrade?.plan_name ?? "higher"} plan`
+              }
+              className={[
+                "flex-1 rounded-sm px-4 py-2.5 text-md font-medium transition-colors",
+                isActive
+                  ? "bg-coral text-white"
+                  : m.operational
+                  ? "text-secondary hover:text-primary hover:bg-elev"
+                  : "text-tertiary/70 hover:text-secondary hover:bg-elev",
+              ].join(" ")}
+            >
+              <span className="flex items-center justify-center gap-1.5">
+                {m.label}
+                {!m.operational && (
+                  <Lock className="h-3.5 w-3.5 opacity-70" strokeWidth={2.2} />
+                )}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
-      {current?.operational ? <CashPaymentForm /> : <ComingSoonPanel method={current} />}
+      {current?.operational ? (
+        <CashPaymentForm />
+      ) : (
+        <LockedPanel method={current} onUpgrade={() => current && setUpgradeMethod(current)} />
+      )}
+
+      {upgradeMethod?.upgrade && (
+        <UpgradeModal
+          method={upgradeMethod}
+          onClose={() => setUpgradeMethod(null)}
+        />
+      )}
     </AppShell>
   );
 }
 
+function LockedPanel({
+  method,
+  onUpgrade,
+}: {
+  method?: PaymentMethod;
+  onUpgrade: () => void;
+}) {
+  if (!method) return null;
+  return (
+    <div className="rounded-md border border-subtle bg-card p-12">
+      <div className="mx-auto max-w-md text-center">
+        <div className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-elev">
+          <Lock className="h-5 w-5 text-tertiary" />
+        </div>
+        <h3 className="mb-3 text-xl font-semibold tracking-tight text-primary">
+          {method.label}
+        </h3>
+        <p className="text-md text-secondary leading-relaxed">
+          {method.description}
+        </p>
+        <p className="mt-4 text-md text-secondary">
+          This method is part of the{" "}
+          <span className="font-medium text-primary">
+            {method.upgrade?.plan_name}
+          </span>{" "}
+          plan.
+        </p>
+        <button
+          type="button"
+          onClick={onUpgrade}
+          className="mt-6 rounded-md bg-coral px-5 py-2.5 text-md font-medium text-white hover:bg-coral-dim"
+        >
+          Unlock with {method.upgrade?.plan_name}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function UpgradeModal({
+  method,
+  onClose,
+}: {
+  method: PaymentMethod;
+  onClose: () => void;
+}) {
+  const up = method.upgrade!;
+  const hasDiscount = up.discount_percent > 0;
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-md rounded-lg border border-subtle bg-card p-6 shadow-frame"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-1 flex items-start justify-between">
+          <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-coral-soft">
+            <Lock className="h-4 w-4 text-coral" />
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-tertiary hover:text-primary"
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
+
+        <h2 className="mt-3 text-xl font-semibold tracking-tight text-primary">
+          Unlock {method.label}
+        </h2>
+        <p className="mt-2 text-md text-secondary leading-relaxed">
+          {method.description} It's included in the{" "}
+          <span className="font-medium text-primary">{up.plan_name}</span> plan.
+        </p>
+
+        <div className="mt-5 rounded-md border border-subtle bg-elev p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-md font-medium text-primary">
+              {up.plan_name} plan
+            </span>
+            <div className="text-right">
+              {hasDiscount ? (
+                <>
+                  <span className="mr-2 text-md text-tertiary line-through">
+                    €{up.monthly_price_eur}
+                  </span>
+                  <span className="text-lg font-semibold text-coral">
+                    €{up.discounted_price_eur}
+                  </span>
+                  <span className="text-sm text-tertiary">/mo</span>
+                </>
+              ) : (
+                <span className="text-lg font-semibold text-primary">
+                  €{up.monthly_price_eur}
+                  <span className="text-sm text-tertiary">/mo</span>
+                </span>
+              )}
+            </div>
+          </div>
+          {hasDiscount && (
+            <div className="mt-2 inline-flex items-center rounded-sm bg-coral-soft px-2 py-0.5 font-mono text-2xs uppercase tracking-caps text-coral">
+              {up.discount_label ?? `${up.discount_percent}% off`}
+            </div>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-6 w-full rounded-md bg-coral px-4 py-3 text-md font-medium text-white hover:bg-coral-dim"
+        >
+          Upgrade to {up.plan_name}
+          {hasDiscount ? ` — €${up.discounted_price_eur}/mo` : ""}
+        </button>
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-2 w-full rounded-md px-4 py-2.5 text-md font-medium text-secondary hover:text-primary"
+        >
+          Maybe later
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function CashPaymentForm() {
+  const qc = useQueryClient();
   const [query, setQuery] = useState("");
   const [member, setMember] = useState<
     Extract<LookupResult, { single_match: true }>["member"] | null
@@ -169,6 +339,9 @@ function CashPaymentForm() {
       setMember(null);
       setAmount("");
       setNote("");
+      // Payment can activate a locked card → status flips to active.
+      // Refresh the list/dashboard/member views so it shows without F5.
+      invalidateMemberData(qc, member?.id);
     },
     onError: (e: Error) => {
       const code = e instanceof ApiError ? e.detail || e.code : e.message;
@@ -359,31 +532,6 @@ function CashPaymentForm() {
             instantly — they can use the QR right away.
           </li>
         </ol>
-      </div>
-    </div>
-  );
-}
-
-function ComingSoonPanel({ method }: { method?: PaymentMethod }) {
-  if (!method) return null;
-  return (
-    <div className="rounded-md border border-subtle bg-card p-12">
-      <div className="mx-auto max-w-md text-center">
-        <div className="mx-auto mb-4 inline-flex items-center justify-center rounded-sm bg-coral-soft px-2.5 py-1">
-          <span className="font-mono text-xs uppercase tracking-caps text-coral">
-            Coming soon
-          </span>
-        </div>
-        <h3 className="mb-3 text-xl font-semibold tracking-tight text-primary">
-          {method.label}
-        </h3>
-        <p className="text-md text-secondary leading-relaxed">
-          {method.description} We're actively working on this — it will be
-          available in an upcoming release.
-        </p>
-        <p className="mt-6 text-sm text-tertiary">
-          For now, please use the <span className="text-primary">Cash</span> tab.
-        </p>
       </div>
     </div>
   );

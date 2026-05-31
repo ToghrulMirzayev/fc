@@ -23,7 +23,8 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import select
 
 from app.core.security import hash_password
-from app.db.session import SessionLocal
+from app.db.provision import drop_tenant_schema, provision_tenant_schema
+from app.db.session import SessionLocal, engine, tenant_session
 from app.models.feature_flag import FeatureFlag, FeatureFlagSetting
 from app.models.member import Member, MemberStatus
 from app.models.membership import Membership, MembershipStatus
@@ -37,6 +38,9 @@ TENANT_SLUG = "demo"
 
 async def reset_state() -> None:
     """Wipe the demo tenant and global feature flags so we start clean."""
+    # Drop the demo tenant's data schema first.
+    async with engine.begin() as conn:
+        await drop_tenant_schema(conn, TENANT_SLUG)
     async with SessionLocal() as db:
         # Demo tenant
         result = await db.execute(select(Tenant).where(Tenant.slug == TENANT_SLUG))
@@ -58,8 +62,8 @@ async def reset_state() -> None:
 async def seed() -> None:
     await reset_state()
 
+    # ─── Control plane (public): tenant, owner, feature flags ───
     async with SessionLocal() as db:
-        # ─── Demo tenant (already active so login works) ───
         tenant = Tenant(
             slug=TENANT_SLUG,
             name="Fitness Court Demo",
@@ -69,11 +73,11 @@ async def seed() -> None:
         )
         db.add(tenant)
         await db.flush()
+        tenant_id = tenant.id
         print(f"Created tenant {tenant.slug} ({tenant.name})")
 
-        # ─── Owner ───
         owner = User(
-            tenant_id=tenant.id,
+            tenant_id=tenant_id,
             email="demo@fitnesscourt.com",
             password_hash=hash_password("demo12345"),
             full_name="Demo Owner",
@@ -81,12 +85,63 @@ async def seed() -> None:
         )
         db.add(owner)
         await db.flush()
+        owner_id = owner.id
         print(f"Created owner {owner.email} (password: demo12345)")
 
+        # ─── Global feature flag: signup discount ───
+        flag = FeatureFlag(
+            tenant_id=None,
+            key="signup_discount",
+            enabled=True,
+            description="Show a discount banner on the public signup landing page.",
+        )
+        db.add(flag)
+        await db.flush()
+        db.add(
+            FeatureFlagSetting(
+                feature_flag_id=flag.id,
+                setting_key="percent",
+                setting_value="15",
+            )
+        )
+        db.add(
+            FeatureFlagSetting(
+                feature_flag_id=flag.id,
+                setting_key="message",
+                setting_value="Sign up this month and get {percent}% off your first 3 months.",
+            )
+        )
+
+        # ─── Per-tenant feature gates for the demo workspace ───
+        demo_gates = {
+            "bookings": True,
+            "analytics": True,
+            "telegram_automation": False,
+            "ai_insights": False,
+            "access_control": False,
+        }
+        for key, enabled in demo_gates.items():
+            db.add(
+                FeatureFlag(
+                    tenant_id=tenant_id,
+                    key=key,
+                    enabled=enabled,
+                    description=f"Demo gate for '{key}'.",
+                )
+            )
+
+        await db.commit()
+
+    # ─── Provision the demo tenant's data schema ───
+    async with engine.begin() as conn:
+        await provision_tenant_schema(conn, TENANT_SLUG)
+
+    # ─── Data plane (t_demo): plans, members, memberships, visits, payments ───
+    async with tenant_session(TENANT_SLUG) as db:
         # ─── Plans ───
         plans = [
             MembershipPlan(
-                tenant_id=tenant.id,
+                tenant_id=tenant_id,
                 name="Monthly Unlimited",
                 type=PlanType.UNLIMITED_MONTHLY,
                 price=80,
@@ -94,7 +149,7 @@ async def seed() -> None:
                 visit_limit=None,
             ),
             MembershipPlan(
-                tenant_id=tenant.id,
+                tenant_id=tenant_id,
                 name="10-visit pack",
                 type=PlanType.LIMITED_VISITS,
                 price=60,
@@ -102,7 +157,7 @@ async def seed() -> None:
                 visit_limit=10,
             ),
             MembershipPlan(
-                tenant_id=tenant.id,
+                tenant_id=tenant_id,
                 name="Yearly Premium",
                 type=PlanType.YEARLY,
                 price=800,
@@ -110,7 +165,7 @@ async def seed() -> None:
                 visit_limit=None,
             ),
             MembershipPlan(
-                tenant_id=tenant.id,
+                tenant_id=tenant_id,
                 name="Trial 7-day",
                 type=PlanType.TRIAL,
                 price=0,
@@ -145,7 +200,7 @@ async def seed() -> None:
         members = []
         for full_name, phone, plan, days_from_now, email, is_paid in member_data:
             m = Member(
-                tenant_id=tenant.id,
+                tenant_id=tenant_id,
                 full_name=full_name,
                 phone=phone,
                 email=email,
@@ -171,7 +226,7 @@ async def seed() -> None:
                 else None
             )
             ms = Membership(
-                tenant_id=tenant.id,
+                tenant_id=tenant_id,
                 member_id=member.id,
                 plan_id=plan.id,
                 plan_name=plan.name,
@@ -203,7 +258,7 @@ async def seed() -> None:
             )
             db.add(
                 Visit(
-                    tenant_id=tenant.id,
+                    tenant_id=tenant_id,
                     member_id=member.id,
                     membership_id=membership.id,
                     method=CheckinMethod.QR,
@@ -217,42 +272,18 @@ async def seed() -> None:
                 continue
             db.add(
                 Payment(
-                    tenant_id=tenant.id,
+                    tenant_id=tenant_id,
                     member_id=member.id,
                     membership_id=membership.id,
                     amount=plan.price,
                     currency="AZN",
                     source=PaymentSource.CASH,
                     note=f"{plan.name} — cash at front desk",
-                    recorded_by_user_id=owner.id,
+                    recorded_by_user_id=owner_id,
                 )
             )
 
-        # ─── Global feature flag: signup discount ───
-        flag = FeatureFlag(
-            tenant_id=None,
-            key="signup_discount",
-            enabled=True,
-            description="Show a discount banner on the public signup landing page.",
-        )
-        db.add(flag)
-        await db.flush()
-        db.add(
-            FeatureFlagSetting(
-                feature_flag_id=flag.id,
-                setting_key="percent",
-                setting_value="15",
-            )
-        )
-        db.add(
-            FeatureFlagSetting(
-                feature_flag_id=flag.id,
-                setting_key="message",
-                setting_value="Sign up this month and get {percent}% off your first 3 months.",
-            )
-        )
-
-        await db.commit()
+        # tenant_session commits on exit.
         print("Seed complete.")
         print()
         print("Login at http://localhost:3000/login")

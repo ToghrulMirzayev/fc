@@ -27,6 +27,7 @@ from app.services.freeze import FreezeError, freeze_membership, resume_membershi
 from app.services.linking import create_linking_code
 from app.services.member import (
     assign_plan,
+    compute_member_status,
     create_member,
     get_active_membership,
     initials_of,
@@ -121,6 +122,31 @@ async def _load_member(db: AsyncSession, member_id: UUID) -> Member:
     if member is None or member.tenant_id != tenant_id:
         raise HTTPException(status_code=404, detail="Member not found")
     return member
+
+
+async def _member_out(db: AsyncSession, member: Member) -> MemberOut:
+    """Build the full member-detail payload.
+
+    Shared by GET and every mutating endpoint (assign/freeze/resume) so
+    each action returns the member's complete, current state — the
+    frontend writes it straight into its cache and updates with no F5.
+
+    The caller's pending changes are flushed by the SELECT below (autoflush),
+    so the returned snapshot reflects the just-applied mutation.
+    """
+    active = await get_active_membership(db, member.id)
+    return MemberOut(
+        id=member.id,
+        full_name=member.full_name,
+        phone=member.phone,
+        email=member.email,
+        telegram_user_id=member.telegram_user_id,
+        locale=member.locale,
+        status=member.status.value,
+        notes=member.notes,
+        initials=initials_of(member.full_name),
+        active_membership=(await membership_to_brief(active)) if active else None,
+    )
 
 
 @router.get("", response_model=MemberListOut)
@@ -227,50 +253,57 @@ async def linking_code_endpoint(
     )
 
 
-@router.post("/{member_id}/assign-plan", status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/{member_id}/assign-plan",
+    response_model=MemberOut,
+    status_code=status.HTTP_201_CREATED,
+)
 async def assign_plan_endpoint(
     member_id: UUID,
     payload: AssignPlanIn,
     _user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session),
-) -> dict:
+) -> MemberOut:
     member = await _load_member(db, member_id)
     plan = await db.get(MembershipPlan, payload.plan_id)
     if plan is None or plan.tenant_id != member.tenant_id:
         raise HTTPException(status_code=404, detail="Plan not found")
     try:
-        membership = await assign_plan(db, member, plan, payload.starts_on)
+        await assign_plan(db, member, plan, payload.starts_on)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    return {"membership_id": str(membership.id)}
+    return await _member_out(db, member)
 
 
-@router.post("/{member_id}/freeze")
+@router.post("/{member_id}/freeze", response_model=MemberOut)
 async def freeze_endpoint(
     member_id: UUID,
     payload: FreezeIn,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session),
-) -> dict:
+) -> MemberOut:
     member = await _load_member(db, member_id)
     membership = await get_active_membership(db, member.id)
     if membership is None:
         raise HTTPException(status_code=400, detail="No active membership")
     try:
-        period = await freeze_membership(
+        await freeze_membership(
             db, membership, payload.ends_on, user.id, payload.reason
         )
     except FreezeError as e:
         raise HTTPException(status_code=400, detail=e.code)
-    return {"freeze_period_id": str(period.id)}
+    # Keep the denormalized member.status in sync so the UI updates
+    # immediately instead of waiting for the daily recompute task.
+    member.status = compute_member_status(membership)
+    return await _member_out(db, member)
 
 
-@router.post("/{member_id}/resume")
+@router.post("/{member_id}/resume", response_model=MemberOut)
 async def resume_endpoint(
     member_id: UUID,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session),
-) -> dict:
+) -> MemberOut:
     member = await _load_member(db, member_id)
     membership = await get_active_membership(db, member.id)
     if membership is None or membership.status != MembershipStatus.FROZEN:
@@ -279,7 +312,8 @@ async def resume_endpoint(
         await resume_membership(db, membership, user.id)
     except FreezeError as e:
         raise HTTPException(status_code=400, detail=e.code)
-    return {"ok": True}
+    member.status = compute_member_status(membership)
+    return await _member_out(db, member)
 
 
 @router.get("/{member_id}/visits")

@@ -121,26 +121,48 @@ export async function api<T = unknown>(
 
 // ─── Auth ───
 
-export async function login(email: string, password: string) {
+export async function login(
+  email: string,
+  password: string,
+  workspaceSlug?: string,
+) {
   const data = await api<{ access_token: string; refresh_token: string }>(
     "/api/v1/auth/login",
     {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({
+        email,
+        password,
+        workspace_slug: workspaceSlug ?? null,
+      }),
     },
   );
   tokens.set(data.access_token, data.refresh_token);
   return data;
 }
 
+export type CurrentUser = {
+  id: string;
+  email: string;
+  full_name: string;
+  role: string;
+  tenant_id: string | null;
+  tenant_slug: string | null;
+  tenant_name: string | null;
+  // Resolved feature gates for this tenant: { feature_key: enabled }.
+  features: Record<string, boolean>;
+};
+
 export async function fetchMe() {
-  return api<{
-    id: string;
-    email: string;
-    full_name: string;
-    role: string;
-    tenant_id: string | null;
-    tenant_slug: string | null;
-    tenant_name: string | null;
-  }>("/api/v1/auth/me");
+  return api<CurrentUser>("/api/v1/auth/me");
+}
+
+export async function updateMe(patch: {
+  full_name?: string;
+  email?: string;
+}) {
+  return api<CurrentUser>("/api/v1/auth/me", {
+    method: "PATCH",
+    body: JSON.stringify(patch),
+  });
 }

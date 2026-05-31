@@ -153,3 +153,17 @@ def get_billing_plan(tier: BillingPlanTier) -> BillingPlanInfo:
         if plan.tier == tier:
             return plan
     raise KeyError(f"Unknown billing tier: {tier}")
+
+
+# Cheapest → most expensive. Used to compare what a tenant has against
+# what a feature/payment-method requires.
+TIER_ORDER: tuple[BillingPlanTier, ...] = tuple(p.tier for p in BILLING_PLANS)
+
+
+def tier_rank(tier: BillingPlanTier) -> int:
+    return TIER_ORDER.index(tier)
+
+
+def tier_at_least(have: BillingPlanTier, required: BillingPlanTier) -> bool:
+    """True if `have` is the same tier as `required` or higher."""
+    return tier_rank(have) >= tier_rank(required)

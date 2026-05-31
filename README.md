@@ -33,6 +33,7 @@ docker compose up --build
 # 3. In another terminal — run migrations and seed demo data
 docker compose exec api alembic upgrade head
 docker compose exec api python -m app.scripts.seed_dev
+docker compose exec api python -m app.scripts.seed_plans
 
 # 4. Open the admin
 #    http://localhost:3000/login

@@ -45,3 +45,19 @@ export function useAuth() {
 
   return { user: query.data, isLoading: query.isLoading };
 }
+
+/**
+ * useFeature — true if a feature gate is enabled for the current tenant.
+ *
+ * Anything not explicitly enabled resolves to false, so callers should
+ * HIDE the gated section/button entirely rather than disabling it.
+ */
+export function useFeature(key: string): boolean {
+  const { user } = useAuth();
+  return user?.features?.[key] === true;
+}
+
+export function useFeatures(): Record<string, boolean> {
+  const { user } = useAuth();
+  return user?.features ?? {};
+}
