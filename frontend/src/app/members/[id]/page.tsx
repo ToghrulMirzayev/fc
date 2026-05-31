@@ -7,6 +7,7 @@ import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { Button, PageHeader } from "@/components/PageHeader";
 import { api, ApiError } from "@/lib/api";
+import { invalidateMemberData } from "@/lib/invalidate";
 import { useAuth } from "@/lib/useAuth";
 
 type MemberDetail = {
@@ -86,17 +87,27 @@ export default function MemberProfilePage() {
     onError: (e: Error) => setError(e.message),
   });
 
+  // After any status-changing action we just re-GET the member and write
+  // the fresh result into the cache. This re-renders the page immediately
+  // (no F5) and doesn't depend on the POST's response body, so it works
+  // even before the backend container is rebuilt.
+  const refreshMember = async () => {
+    const fresh = await api<MemberDetail>(`/api/v1/members/${memberId}`);
+    qc.setQueryData(["member", memberId], fresh);
+    invalidateMemberData(qc, memberId);
+  };
+
   const assignPlan = useMutation({
     mutationFn: (planId: string) =>
       api(`/api/v1/members/${memberId}/assign-plan`, {
         method: "POST",
         body: JSON.stringify({ plan_id: planId }),
       }),
-    onSuccess: () => {
+    onSuccess: async () => {
       setSuccess("Plan assigned. Card is locked until payment is recorded.");
       setShowAssign(false);
       setError(null);
-      qc.invalidateQueries({ queryKey: ["member", memberId] });
+      await refreshMember();
     },
     onError: (e: Error) =>
       setError(e instanceof ApiError ? e.detail || e.message : e.message),
@@ -108,10 +119,10 @@ export default function MemberProfilePage() {
         method: "POST",
         body: JSON.stringify({ ends_on: args.endsOn, reason: args.reason }),
       }),
-    onSuccess: () => {
+    onSuccess: async () => {
       setShowFreeze(false);
       setError(null);
-      qc.invalidateQueries({ queryKey: ["member", memberId] });
+      await refreshMember();
     },
     onError: (e: Error) =>
       setError(e instanceof ApiError ? e.detail || e.message : e.message),
@@ -123,7 +134,9 @@ export default function MemberProfilePage() {
         method: "POST",
         body: "{}",
       }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["member", memberId] }),
+    onSuccess: async () => {
+      await refreshMember();
+    },
   });
 
   if (authLoading || !user || !member) {

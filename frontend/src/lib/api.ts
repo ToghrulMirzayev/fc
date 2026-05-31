@@ -156,3 +156,13 @@ export type CurrentUser = {
 export async function fetchMe() {
   return api<CurrentUser>("/api/v1/auth/me");
 }
+
+export async function updateMe(patch: {
+  full_name?: string;
+  email?: string;
+}) {
+  return api<CurrentUser>("/api/v1/auth/me", {
+    method: "PATCH",
+    body: JSON.stringify(patch),
+  });
+}

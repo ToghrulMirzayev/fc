@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Lock } from "lucide-react";
 
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { api, ApiError } from "@/lib/api";
+import { invalidateMemberData } from "@/lib/invalidate";
 import { useAuth } from "@/lib/useAuth";
 
 type UpgradeInfo = {
@@ -276,6 +277,7 @@ function UpgradeModal({
 }
 
 function CashPaymentForm() {
+  const qc = useQueryClient();
   const [query, setQuery] = useState("");
   const [member, setMember] = useState<
     Extract<LookupResult, { single_match: true }>["member"] | null
@@ -337,6 +339,9 @@ function CashPaymentForm() {
       setMember(null);
       setAmount("");
       setNote("");
+      // Payment can activate a locked card → status flips to active.
+      // Refresh the list/dashboard/member views so it shows without F5.
+      invalidateMemberData(qc, member?.id);
     },
     onError: (e: Error) => {
       const code = e instanceof ApiError ? e.detail || e.code : e.message;
