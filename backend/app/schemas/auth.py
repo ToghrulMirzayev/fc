@@ -24,6 +24,12 @@ class RefreshIn(BaseModel):
     refresh_token: str
 
 
+class UpdateMeIn(BaseModel):
+    # Both optional — the client sends only the field(s) being edited.
+    full_name: str | None = Field(default=None, min_length=2, max_length=128)
+    email: EmailStr | None = None
+
+
 class CurrentUserOut(BaseModel):
     id: UUID
     email: EmailStr

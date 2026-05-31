@@ -186,6 +186,17 @@ async def record_cash_endpoint(
         membership = await db.get(Membership, payload.membership_id)
         if membership is None or membership.member_id != member.id:
             raise HTTPException(status_code=400, detail="Membership mismatch")
+        # Don't record a second payment for an already-paid card. Tell the
+        # clerk it's already settled and until when the plan stays active.
+        if membership.is_paid:
+            until = membership.expires_on.strftime("%d %b %Y")
+            raise HTTPException(
+                status_code=409,
+                detail=(
+                    f"{member.full_name} has already paid — "
+                    f"membership is active until {until}."
+                ),
+            )
 
     payment = await record_cash_payment(
         db,

@@ -7,6 +7,7 @@ import { AppShell } from "@/components/AppShell";
 import { Button, PageHeader } from "@/components/PageHeader";
 import { IconSearch } from "@/components/icons";
 import { api, ApiError } from "@/lib/api";
+import { invalidateMemberData } from "@/lib/invalidate";
 import { useAuth } from "@/lib/useAuth";
 
 type ScanResult = {
@@ -125,7 +126,7 @@ export default function CheckinsPage() {
       setLastResult(result);
       setError(null);
       setScanInput("");
-      qc.invalidateQueries({ queryKey: ["checkins-feed"] });
+      invalidateMemberData(qc, result.member_id);
       setTimeout(() => inputRef.current?.focus(), 100);
     },
     onError: (e: Error) => {
@@ -176,11 +177,12 @@ export default function CheckinsPage() {
             setLastResult(result);
             setError(null);
             setManualOpen(false);
-            qc.invalidateQueries({ queryKey: ["checkins-feed"] });
+            invalidateMemberData(qc, result.member_id);
           }}
           onError={(msg) => {
             setError(msg);
             setLastResult(null);
+            setManualOpen(false);
           }}
         />
       )}
