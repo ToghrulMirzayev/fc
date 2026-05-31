@@ -15,7 +15,9 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script_stop: true
           script: |
+            set -e
             cd ~/fc
 
             echo "Pull latest code"
