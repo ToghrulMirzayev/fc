@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { Eye, EyeOff } from "lucide-react";
 
@@ -24,6 +25,7 @@ export default function CredentialsPage() {
   const params = useParams<{ slug: string }>();
   const slug = params.slug;
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [notFound, setNotFound] = useState(false);
 
@@ -52,7 +54,10 @@ export default function CredentialsPage() {
     setError(null);
     setPending(true);
     try {
-      await login(email, password);
+      await login(email, password, slug);
+      // Drop any cached data from a previous session/tenant so the new
+      // workspace's user, features and lists are fetched fresh.
+      queryClient.clear();
       router.push("/");
     } catch (e) {
       const msg = (e as Error)?.message?.toLowerCase() || "";

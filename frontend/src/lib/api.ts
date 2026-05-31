@@ -121,12 +121,20 @@ export async function api<T = unknown>(
 
 // ─── Auth ───
 
-export async function login(email: string, password: string) {
+export async function login(
+  email: string,
+  password: string,
+  workspaceSlug?: string,
+) {
   const data = await api<{ access_token: string; refresh_token: string }>(
     "/api/v1/auth/login",
     {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({
+        email,
+        password,
+        workspace_slug: workspaceSlug ?? null,
+      }),
     },
   );
   tokens.set(data.access_token, data.refresh_token);

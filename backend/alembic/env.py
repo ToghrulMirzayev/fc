@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.core.config import settings  # noqa: E402
 from app.db.base import Base  # noqa: E402
+from app.db.tenancy import TENANT_SCHEMA  # noqa: E402
 from app.models import *  # noqa: F401, F403, E402  — register all models
 
 config = context.config
@@ -32,19 +33,40 @@ config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 target_metadata = Base.metadata
 
 
+def include_object(obj, name, type_, reflected, compare_to) -> bool:
+    """Keep the per-tenant (sentinel) schema out of autogenerate.
+
+    Those tables are materialised per tenant by app.db.provision, not by
+    Alembic, so Alembic must ignore the sentinel ``tenant`` schema.
+    """
+    if type_ == "table" and getattr(obj, "schema", None) == TENANT_SCHEMA:
+        return False
+    return True
+
+
 def run_migrations_offline() -> None:
     context.configure(
         url=settings.DATABASE_URL,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        include_object=include_object,
     )
     with context.begin_transaction():
         context.run_migrations()
 
 
 def do_run_migrations(connection: Connection) -> None:
-    context.configure(connection=connection, target_metadata=target_metadata)
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        include_object=include_object,
+        # Commit after each migration so DDL like ALTER TYPE ... ADD VALUE
+        # (0003 adds 'free' to billingplantier) is committed before a later
+        # migration (0004) uses that new enum value — Postgres forbids using
+        # a freshly added enum value in the same transaction.
+        transaction_per_migration=True,
+    )
     with context.begin_transaction():
         context.run_migrations()
 

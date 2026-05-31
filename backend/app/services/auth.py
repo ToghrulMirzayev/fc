@@ -21,11 +21,22 @@ class AuthError(Exception):
     """Domain-level auth failure. Routers map to 401."""
 
 
-async def login(db: AsyncSession, email: str, password: str) -> tuple[User, str, str]:
+async def login(
+    db: AsyncSession,
+    email: str,
+    password: str,
+    tenant_slug: str | None = None,
+) -> tuple[User, str, str]:
     """Verify credentials and issue access + refresh tokens.
+
+    When `tenant_slug` is given, the user must belong to that workspace —
+    this keeps tenants isolated so one gym's admin can't sign in under
+    another gym's workspace.
 
     Returns (user, access_token, raw_refresh_token).
     """
+    from app.models.tenant import Tenant
+
     result = await db.execute(select(User).where(User.email == email))
     user = result.scalar_one_or_none()
 
@@ -35,6 +46,26 @@ async def login(db: AsyncSession, email: str, password: str) -> tuple[User, str,
         verify_password(password, "$argon2id$v=19$m=65536,t=3,p=4$invalid$invalid")
         db.add(AuditLog(event="auth.login.failed", details=f"email={email}"))
         raise AuthError("invalid_credentials")
+
+    # Workspace isolation: the user must be a member of the workspace they
+    # are signing in to. We resolve the tenant by slug and compare ids.
+    # On mismatch we raise the same generic error as bad credentials so we
+    # don't reveal which workspace an email belongs to.
+    if tenant_slug is not None:
+        slug_result = await db.execute(
+            select(Tenant).where(Tenant.slug == tenant_slug)
+        )
+        workspace = slug_result.scalar_one_or_none()
+        if workspace is None or user.tenant_id != workspace.id:
+            db.add(
+                AuditLog(
+                    event="auth.login.wrong_workspace",
+                    actor_user_id=user.id,
+                    tenant_id=user.tenant_id,
+                    details=f"attempted_workspace={tenant_slug}",
+                )
+            )
+            raise AuthError("invalid_credentials")
 
     if not user.is_active:
         db.add(

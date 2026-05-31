@@ -13,6 +13,7 @@ from sqlalchemy import Enum, ForeignKey, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, TimestampMixin, UUIDPKMixin
+from app.db.tenancy import TENANT_SCHEMA
 
 
 class PlanType(str, enum.Enum):
@@ -25,6 +26,7 @@ class PlanType(str, enum.Enum):
 
 class MembershipPlan(Base, UUIDPKMixin, TimestampMixin):
     __tablename__ = "membership_plans"
+    __table_args__ = {"schema": TENANT_SCHEMA}
 
     tenant_id: Mapped[UUID] = mapped_column(
         ForeignKey("tenants.id", ondelete="CASCADE"), index=True

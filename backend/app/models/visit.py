@@ -13,6 +13,7 @@ from sqlalchemy import DateTime, Enum, ForeignKey, Numeric, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, TimestampMixin, UUIDPKMixin
+from app.db.tenancy import TENANT_SCHEMA
 
 
 class CheckinMethod(str, enum.Enum):
@@ -22,15 +23,17 @@ class CheckinMethod(str, enum.Enum):
 
 class Visit(Base, UUIDPKMixin, TimestampMixin):
     __tablename__ = "visits"
+    __table_args__ = {"schema": TENANT_SCHEMA}
 
     tenant_id: Mapped[UUID] = mapped_column(
         ForeignKey("tenants.id", ondelete="CASCADE"), index=True
     )
     member_id: Mapped[UUID] = mapped_column(
-        ForeignKey("members.id", ondelete="CASCADE"), index=True
+        ForeignKey(f"{TENANT_SCHEMA}.members.id", ondelete="CASCADE"),
+        index=True,
     )
     membership_id: Mapped[UUID] = mapped_column(
-        ForeignKey("memberships.id", ondelete="RESTRICT")
+        ForeignKey(f"{TENANT_SCHEMA}.memberships.id", ondelete="RESTRICT")
     )
     method: Mapped[CheckinMethod] = mapped_column(
         Enum(CheckinMethod, values_callable=lambda x: [e.value for e in x])
@@ -54,15 +57,18 @@ class PaymentSource(str, enum.Enum):
 
 class Payment(Base, UUIDPKMixin, TimestampMixin):
     __tablename__ = "payments"
+    __table_args__ = {"schema": TENANT_SCHEMA}
 
     tenant_id: Mapped[UUID] = mapped_column(
         ForeignKey("tenants.id", ondelete="CASCADE"), index=True
     )
     member_id: Mapped[UUID] = mapped_column(
-        ForeignKey("members.id", ondelete="CASCADE"), index=True
+        ForeignKey(f"{TENANT_SCHEMA}.members.id", ondelete="CASCADE"),
+        index=True,
     )
     membership_id: Mapped[UUID | None] = mapped_column(
-        ForeignKey("memberships.id", ondelete="SET NULL"), nullable=True
+        ForeignKey(f"{TENANT_SCHEMA}.memberships.id", ondelete="SET NULL"),
+        nullable=True,
     )
 
     amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))
