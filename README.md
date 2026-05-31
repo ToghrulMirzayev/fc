@@ -12,6 +12,12 @@ Multi-tenant SaaS for gyms and fitness studios. Memberships, check-ins, manual b
 - **PostgreSQL + Redis** — data + cache + QR nonce store + Celery broker
 - **Celery worker + beat** — scheduled jobs (skeleton; jobs land in Sprint 3)
 
+## Live Environments
+
+The project is deployed and available online (running locally is optional):
+- **Web Portal (Sign up)**: [https://fitness-court.com/signup](https://fitness-court.com/signup)
+- **Backend API (Swagger Docs)**: [https://api.fitness-court.com/docs](https://api.fitness-court.com/docs)
+
 ## Quick start
 
 ```bash

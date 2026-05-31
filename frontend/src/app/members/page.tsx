@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { TableSkeleton } from "@/components/Skeleton";
 
 import { AppShell } from "@/components/AppShell";
 import { Button, PageHeader } from "@/components/PageHeader";
@@ -65,7 +66,7 @@ function MembersPageInner() {
   const statusFilter = params.get("status") || "all";
   const [search, setSearch] = useState(params.get("q") || "");
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["members", statusFilter, search],
     queryFn: () =>
       api<MembersList>(
@@ -81,7 +82,37 @@ function MembersPageInner() {
   if (authLoading || !user) {
     return (
       <AppShell>
-        <div className="text-tertiary">Loading…</div>
+        <PageHeader
+          crumbs={["Operations", "Members"]}
+          title="Members"
+        />
+        <div className="overflow-hidden rounded-md border border-subtle bg-card mt-8">
+          <table className="w-full text-md">
+            <thead>
+              <tr className="border-b border-subtle">
+                <th className="px-4 py-2.5 text-left font-mono text-xs font-medium uppercase tracking-caps text-tertiary">
+                  Member
+                </th>
+                <th className="px-4 py-2.5 text-left font-mono text-xs font-medium uppercase tracking-caps text-tertiary">
+                  Status
+                </th>
+                <th className="px-4 py-2.5 text-left font-mono text-xs font-medium uppercase tracking-caps text-tertiary">
+                  Plan
+                </th>
+                <th className="px-4 py-2.5 text-left font-mono text-xs font-medium uppercase tracking-caps text-tertiary">
+                  Usage
+                </th>
+                <th className="px-4 py-2.5 text-left font-mono text-xs font-medium uppercase tracking-caps text-tertiary">
+                  Expires
+                </th>
+                <th className="w-12 px-4 py-2.5" />
+              </tr>
+            </thead>
+            <tbody>
+              <TableSkeleton rows={5} cols={6} />
+            </tbody>
+          </table>
+        </div>
       </AppShell>
     );
   }
@@ -170,7 +201,10 @@ function MembersPageInner() {
             </tr>
           </thead>
           <tbody>
-            {(data?.items ?? []).map((m) => {
+            {isLoading ? (
+              <TableSkeleton rows={5} cols={6} />
+            ) : (
+              (data?.items ?? []).map((m) => {
               const pct =
                 m.visit_limit && m.visits_remaining !== null
                   ? ((m.visit_limit - m.visits_remaining) / m.visit_limit) * 100
@@ -261,7 +295,7 @@ function MembersPageInner() {
                   </td>
                 </tr>
               );
-            })}
+            }))}
             {data && data.items.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-4 py-16 text-center text-tertiary">
@@ -281,7 +315,37 @@ export default function MembersPage() {
     <Suspense
       fallback={
         <AppShell>
-          <div className="text-tertiary">Loading…</div>
+          <PageHeader
+            crumbs={["Operations", "Members"]}
+            title="Members"
+          />
+          <div className="overflow-hidden rounded-md border border-subtle bg-card mt-8">
+            <table className="w-full text-md">
+              <thead>
+                <tr className="border-b border-subtle">
+                  <th className="px-4 py-2.5 text-left font-mono text-xs font-medium uppercase tracking-caps text-tertiary">
+                    Member
+                  </th>
+                  <th className="px-4 py-2.5 text-left font-mono text-xs font-medium uppercase tracking-caps text-tertiary">
+                    Status
+                  </th>
+                  <th className="px-4 py-2.5 text-left font-mono text-xs font-medium uppercase tracking-caps text-tertiary">
+                    Plan
+                  </th>
+                  <th className="px-4 py-2.5 text-left font-mono text-xs font-medium uppercase tracking-caps text-tertiary">
+                    Usage
+                  </th>
+                  <th className="px-4 py-2.5 text-left font-mono text-xs font-medium uppercase tracking-caps text-tertiary">
+                    Expires
+                  </th>
+                  <th className="w-12 px-4 py-2.5" />
+                </tr>
+              </thead>
+              <tbody>
+                <TableSkeleton rows={5} cols={6} />
+              </tbody>
+            </table>
+          </div>
         </AppShell>
       }
     >

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { AppShell } from "@/components/AppShell";
+import { CardSkeleton } from "@/components/Skeleton";
 import { Button, PageHeader } from "@/components/PageHeader";
 import { IconPlus } from "@/components/icons";
 import { api } from "@/lib/api";
@@ -34,7 +35,7 @@ export default function PlansPage() {
   const qc = useQueryClient();
   const [creating, setCreating] = useState(false);
 
-  const { data: plans } = useQuery({
+  const { data: plans, isLoading } = useQuery({
     queryKey: ["plans"],
     queryFn: () => api<Plan[]>("/api/v1/plans"),
     enabled: !!user,
@@ -52,7 +53,13 @@ export default function PlansPage() {
   if (authLoading || !user) {
     return (
       <AppShell>
-        <div className="text-tertiary">Loading…</div>
+        <PageHeader
+          crumbs={["Catalog", "Plans"]}
+          title="Membership plans"
+        />
+        <div className="grid grid-cols-3 gap-4 mt-8">
+          <CardSkeleton count={3} />
+        </div>
       </AppShell>
     );
   }
@@ -83,7 +90,10 @@ export default function PlansPage() {
       )}
 
       <div className="grid grid-cols-3 gap-4">
-        {plans?.map((p) => (
+        {isLoading ? (
+          <CardSkeleton count={3} />
+        ) : (
+          plans?.map((p) => (
           <div key={p.id} className="rounded-md border border-subtle bg-card p-5">
             <div className="mb-3 font-mono text-xs uppercase tracking-caps text-tertiary">
               {PLAN_TYPE_LABELS[p.type] || p.type}
@@ -110,8 +120,8 @@ export default function PlansPage() {
               </div>
             </dl>
           </div>
-        ))}
-        {plans && plans.length === 0 && !creating && (
+        )))}
+        {plans && plans.length === 0 && !creating && !isLoading && (
           <div className="col-span-3 rounded-md border border-subtle bg-card p-8 text-center text-tertiary">
             No plans yet. Create your first one to start signing up members.
           </div>

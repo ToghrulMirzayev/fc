@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { AppShell } from "@/components/AppShell";
+import { FeedSkeleton } from "@/components/Skeleton";
 import { Button, PageHeader } from "@/components/PageHeader";
 import { IconSearch } from "@/components/icons";
 import { api, ApiError } from "@/lib/api";
@@ -109,7 +110,7 @@ export default function CheckinsPage() {
   const [error, setError] = useState<string | null>(null);
   const [manualOpen, setManualOpen] = useState(false);
 
-  const { data: feed } = useQuery({
+  const { data: feed, isLoading } = useQuery({
     queryKey: ["checkins-feed"],
     queryFn: () => api<Feed>("/api/v1/checkins/feed?limit=15"),
     enabled: !!user,
@@ -145,7 +146,18 @@ export default function CheckinsPage() {
   if (authLoading || !user) {
     return (
       <AppShell>
-        <div className="text-tertiary">Loading…</div>
+        <PageHeader
+          crumbs={["Operations", "Check-ins"]}
+          title="Front desk"
+        />
+        <div className="flex flex-col gap-6 mt-8">
+          <div className="flex flex-col gap-3">
+            <h2 className="text-lg font-semibold tracking-tight text-primary">
+              Live feed
+            </h2>
+            <FeedSkeleton count={4} />
+          </div>
+        </div>
       </AppShell>
     );
   }
@@ -267,14 +279,18 @@ export default function CheckinsPage() {
             </div>
           </div>
 
-          {feed?.items.length === 0 && (
-            <div className="rounded-md border border-subtle bg-card p-8 text-center text-tertiary">
-              No check-ins yet today.
-            </div>
-          )}
+          {isLoading ? (
+            <FeedSkeleton count={4} />
+          ) : (
+            <>
+              {feed?.items.length === 0 && (
+                <div className="rounded-md border border-subtle bg-card p-8 text-center text-tertiary">
+                  No check-ins yet today.
+                </div>
+              )}
 
-          {feed?.items.map((item, idx) => {
-            const fresh = idx === 0;
+              {feed?.items.map((item, idx) => {
+                const fresh = idx === 0;
             return (
               <div
                 key={item.id}
@@ -316,6 +332,8 @@ export default function CheckinsPage() {
               </div>
             );
           })}
+            </>
+          )}
         </div>
       </div>
     </AppShell>
