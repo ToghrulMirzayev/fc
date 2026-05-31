@@ -16,6 +16,7 @@ from sqlalchemy import Date, Enum, ForeignKey, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, TimestampMixin, UUIDPKMixin
+from app.db.tenancy import TENANT_SCHEMA
 from app.models.plan import PlanType
 
 
@@ -28,15 +29,17 @@ class MembershipStatus(str, enum.Enum):
 
 class Membership(Base, UUIDPKMixin, TimestampMixin):
     __tablename__ = "memberships"
+    __table_args__ = {"schema": TENANT_SCHEMA}
 
     tenant_id: Mapped[UUID] = mapped_column(
         ForeignKey("tenants.id", ondelete="CASCADE"), index=True
     )
     member_id: Mapped[UUID] = mapped_column(
-        ForeignKey("members.id", ondelete="CASCADE"), index=True
+        ForeignKey(f"{TENANT_SCHEMA}.members.id", ondelete="CASCADE"),
+        index=True,
     )
     plan_id: Mapped[UUID] = mapped_column(
-        ForeignKey("membership_plans.id", ondelete="RESTRICT")
+        ForeignKey(f"{TENANT_SCHEMA}.membership_plans.id", ondelete="RESTRICT")
     )
 
     # Snapshot from plan at creation
@@ -79,12 +82,14 @@ class FreezePeriod(Base, UUIDPKMixin, TimestampMixin):
     """
 
     __tablename__ = "freeze_periods"
+    __table_args__ = {"schema": TENANT_SCHEMA}
 
     tenant_id: Mapped[UUID] = mapped_column(
         ForeignKey("tenants.id", ondelete="CASCADE"), index=True
     )
     membership_id: Mapped[UUID] = mapped_column(
-        ForeignKey("memberships.id", ondelete="CASCADE"), index=True
+        ForeignKey(f"{TENANT_SCHEMA}.memberships.id", ondelete="CASCADE"),
+        index=True,
     )
     starts_on: Mapped[date] = mapped_column(Date)
     ends_on: Mapped[date] = mapped_column(Date)

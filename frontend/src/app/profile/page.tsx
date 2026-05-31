@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { AppShell } from "@/components/AppShell";
 import { Button, PageHeader } from "@/components/PageHeader";
@@ -33,11 +34,14 @@ function initialsOf(name: string): string {
 
 export default function ProfilePage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { user, isLoading } = useAuth();
   const [showConfirm, setShowConfirm] = useState(false);
 
   const logout = () => {
     tokens.clear();
+    // Wipe cached queries so the next user doesn't see this session's data.
+    queryClient.clear();
     const targetUrl = user?.tenant_slug ? `/login/${user.tenant_slug}` : "/login";
     router.replace(targetUrl);
   };

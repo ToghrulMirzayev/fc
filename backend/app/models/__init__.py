@@ -1,6 +1,7 @@
 """Import every model here so Alembic's autogenerate sees them all."""
 
 from app.models.audit import AuditLog, RefreshToken
+from app.models.discount import Discount
 from app.models.feature_flag import FeatureFlag, FeatureFlagSetting
 from app.models.member import Member, MemberStatus
 from app.models.membership import FreezePeriod, Membership, MembershipStatus
@@ -14,6 +15,7 @@ __all__ = [
     "AuditLog",
     "BillingPlanTier",
     "CheckinMethod",
+    "Discount",
     "FeatureFlag",
     "FeatureFlagSetting",
     "FreezePeriod",

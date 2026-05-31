@@ -9,13 +9,17 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.billing_plans import get_billing_plan, tier_at_least
 from app.core.deps import get_current_user
 from app.core.tenant import require_current_tenant
 from app.db.session import get_session
 from app.models.member import Member
 from app.models.membership import Membership
 from app.models.plan import MembershipPlan, PlanType
+from app.models.signup import BillingPlanTier
+from app.models.tenant import Tenant
 from app.models.user import User
+from app.services.discount import SCOPE_PAYMENTS, get_discount
 from app.models.visit import CheckinMethod, Payment, PaymentSource, Visit
 from app.schemas.member import PlanCreate, PlanOut
 from app.services.checkin import CheckinError, checkin_via_qr, record_visit
@@ -76,39 +80,93 @@ class CashPaymentIn(BaseModel):
     note: str | None = None
 
 
-@payments_router.get("/methods")
-async def list_payment_methods() -> dict:
-    """Available payment methods and their operational status.
+# Each non-cash method unlocks at a specific pricing tier. Cash has no
+# requirement (available on every plan, including the free trial).
+_PAYMENT_METHODS: tuple[dict, ...] = (
+    {
+        "key": "cash",
+        "label": "Cash",
+        "description": "Mark a payment received in cash at the front desk.",
+        "required_tier": None,
+    },
+    {
+        "key": "card_terminal",
+        "label": "Card / Apple Pay / Google Pay",
+        "description": "In-person card and wallet payments via an attached terminal.",
+        "required_tier": BillingPlanTier.BASIC,
+    },
+    {
+        "key": "bank_transfer",
+        "label": "Bank Transfer",
+        "description": "Reconcile incoming bank transfers automatically.",
+        "required_tier": BillingPlanTier.ADVANCED,
+    },
+    {
+        "key": "online",
+        "label": "Online Checkout",
+        "description": "Self-serve online checkout for members.",
+        "required_tier": BillingPlanTier.ADVANCED,
+    },
+)
 
-    The frontend uses this to render four tabs and lock the non-operational ones.
+
+@payments_router.get("/methods")
+async def list_payment_methods(
+    _user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+) -> dict:
+    """Available payment methods for the tenant's current plan.
+
+    Each method reports whether it's available on the current plan and, if
+    not, which tier unlocks it and how much that upgrade costs (with the
+    active "payments" discount, configured in the discounts table, applied).
+    The frontend renders the locked ones dimmed with a lock and an upgrade
+    popup.
     """
+    tenant_id = require_current_tenant()
+    tenant = await db.get(Tenant, tenant_id)
+    have_tier = tenant.billing_tier if tenant else BillingPlanTier.FREE
+
+    discount = await get_discount(db, SCOPE_PAYMENTS)
+    discount_out = (
+        {"percent": discount.percent, "label": discount.label}
+        if discount
+        else None
+    )
+
+    methods = []
+    for m in _PAYMENT_METHODS:
+        required: BillingPlanTier | None = m["required_tier"]
+        operational = required is None or tier_at_least(have_tier, required)
+
+        upgrade = None
+        if not operational and required is not None:
+            plan = get_billing_plan(required)
+            original = float(plan.monthly_price_eur)
+            discounted = discount.apply(original) if discount else original
+            upgrade = {
+                "required_tier": required.value,
+                "plan_name": plan.name,
+                "monthly_price_eur": plan.monthly_price_eur,
+                "discounted_price_eur": discounted,
+                "discount_percent": discount.percent if discount else 0,
+                "discount_label": discount.label if discount else None,
+            }
+
+        methods.append(
+            {
+                "key": m["key"],
+                "label": m["label"],
+                "description": m["description"],
+                "operational": operational,
+                "upgrade": upgrade,
+            }
+        )
+
     return {
-        "methods": [
-            {
-                "key": "cash",
-                "label": "Cash",
-                "operational": True,
-                "description": "Mark a payment received in cash at the front desk.",
-            },
-            {
-                "key": "bank_transfer",
-                "label": "Bank Transfer",
-                "operational": False,
-                "description": "Reconcile incoming bank transfers automatically.",
-            },
-            {
-                "key": "card_terminal",
-                "label": "Card / Apple Pay / Google Pay",
-                "operational": False,
-                "description": "In-person card and wallet payments via an attached terminal.",
-            },
-            {
-                "key": "online",
-                "label": "Online Checkout",
-                "operational": False,
-                "description": "Self-serve online checkout for members.",
-            },
-        ]
+        "current_tier": have_tier.value,
+        "discount": discount_out,
+        "methods": methods,
     }
 
 

@@ -15,7 +15,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import decode_access_token
 from app.core.tenant import set_current_tenant
-from app.db.session import get_session
+from app.db.session import apply_tenant_schema, get_session
+from app.models.tenant import Tenant
 from app.models.user import User, UserRole
 
 # Bearer auth scheme. auto_error=False because we want to return our own
@@ -69,6 +70,14 @@ async def get_current_user(
 
     # Stash tenant_id in context for the rest of the request.
     set_current_tenant(user.tenant_id)
+
+    # Pin the connection to this tenant's schema so every tenant-scoped
+    # query resolves to t_<slug> and never touches another client's data.
+    # Super admins (no tenant) operate on the control plane only.
+    if user.tenant_id is not None:
+        tenant = await db.get(Tenant, user.tenant_id)
+        if tenant is not None:
+            await apply_tenant_schema(db, tenant.slug)
     return user
 
 

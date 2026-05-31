@@ -20,7 +20,12 @@ async def login_endpoint(
     db: AsyncSession = Depends(get_session),
 ) -> TokenPair:
     try:
-        _user, access, refresh = await login(db, payload.email, payload.password)
+        _user, access, refresh = await login(
+            db,
+            payload.email,
+            payload.password,
+            tenant_slug=payload.workspace_slug,
+        )
     except AuthError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

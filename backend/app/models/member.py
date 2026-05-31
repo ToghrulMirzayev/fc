@@ -12,6 +12,7 @@ from sqlalchemy import Enum, ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, TimestampMixin, UUIDPKMixin
+from app.db.tenancy import TENANT_SCHEMA
 
 
 class MemberStatus(str, enum.Enum):
@@ -31,6 +32,8 @@ class Member(Base, UUIDPKMixin, TimestampMixin):
         # Phone is unique within a tenant — same phone could belong to
         # different people across gyms.
         UniqueConstraint("tenant_id", "phone", name="uq_member_tenant_phone"),
+        # Tenant-scoped: lives in the per-tenant schema, translated at runtime.
+        {"schema": TENANT_SCHEMA},
     )
 
     tenant_id: Mapped[UUID] = mapped_column(

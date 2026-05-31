@@ -6,10 +6,11 @@ subdomain or X-Tenant-Slug header, and the base repository injects it into
 every query.
 """
 
-from sqlalchemy import String
+from sqlalchemy import Enum, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, TimestampMixin, UUIDPKMixin
+from app.models.signup import BillingPlanTier
 
 
 class Tenant(Base, UUIDPKMixin, TimestampMixin):
@@ -17,6 +18,13 @@ class Tenant(Base, UUIDPKMixin, TimestampMixin):
 
     slug: Mapped[str] = mapped_column(String(64), unique=True, index=True)
     name: Mapped[str] = mapped_column(String(128))
+    # Which pricing tier this gym is on. Drives feature/payment-method
+    # availability. Concrete tier details live in app/core/billing_plans.py.
+    billing_tier: Mapped[BillingPlanTier] = mapped_column(
+        Enum(BillingPlanTier, values_callable=lambda x: [e.value for e in x]),
+        default=BillingPlanTier.FREE,
+        server_default=BillingPlanTier.FREE.value,
+    )
     # Currency code (ISO 4217). Each gym configures its own.
     currency: Mapped[str] = mapped_column(String(3), default="EUR")
     # Default locale for the Telegram bot when a member's TG locale is unknown.
