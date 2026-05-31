@@ -46,7 +46,10 @@ app = FastAPI(
 # CORS — tighten in prod via env-driven origins list.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"] if settings.DEBUG else [f"https://*.{settings.APP_DOMAIN}"],
+    allow_origins=["*"] if settings.DEBUG else [
+        f"https://{settings.APP_DOMAIN}",
+        f"https://*.{settings.APP_DOMAIN}"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
