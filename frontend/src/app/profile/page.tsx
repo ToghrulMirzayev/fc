@@ -136,7 +136,7 @@ function EditableRow({
           type="button"
           onClick={start}
           aria-label={`Edit ${label.toLowerCase()}`}
-          className="rounded-sm p-1 text-tertiary opacity-0 transition-opacity hover:text-coral group-hover:opacity-100"
+          className="rounded-sm p-1 text-tertiary transition-colors hover:text-coral"
         >
           <IconPencil size={14} />
         </button>
