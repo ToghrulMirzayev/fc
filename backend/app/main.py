@@ -46,7 +46,12 @@ app = FastAPI(
 # CORS — tighten in prod via env-driven origins list.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"] if settings.DEBUG else [
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3001",
+    ] if settings.DEBUG else [
         f"https://{settings.APP_DOMAIN}",
         f"https://*.{settings.APP_DOMAIN}"
     ],

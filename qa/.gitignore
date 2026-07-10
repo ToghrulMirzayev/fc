@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+
+# Environments
+.env
+
+# Playwright / Reports
+test-results/
+playwright-report/
+reports/
+.htmlreport/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+
+# Secrets and configs
+.env.local
+
+# Pytest / Coverage / Lint
+.ruff_cache/
+.coverage
+
+# Test artifacts
+artifacts/
+

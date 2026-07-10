@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { Logo } from "@/components/Logo";
 import { appName } from "@/lib/branding";
+import { Footer } from "@/components/Footer";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -116,6 +117,7 @@ export default function WorkspacePage() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

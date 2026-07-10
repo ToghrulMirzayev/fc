@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "playwright-automation"
+version = "0.1.0"
+description = "Scalable Playwright automation framework"
+authors = ["AQA Engineer <aqa@example.com>"]
+readme = "README.md"
+packages = [{include = "app"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+playwright = "^1.40.0"
+pytest = "^8.0.0"
+pytest-playwright = "^0.4.0"
+pytest-xdist = "^3.5.0"
+python-dotenv = "^1.0.0"
+pytest-html = "^4.1.1"
+
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.3.0"
+black = "^24.2.0"
+pre-commit = "^3.6.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

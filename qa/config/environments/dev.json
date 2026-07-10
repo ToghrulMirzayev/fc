@@ -1,0 +1,10 @@
+{
+  "BASE_URL": "https://dev.fitnesscourt.com",
+  "API_URL": "https://dev-api.fitnesscourt.com",
+  "ADMIN_EMAIL": "dev@fitnesscourt.com",
+  "ADMIN_PASSWORD": "devpassword",
+  "HEADLESS": true,
+  "SLOW_MO": 0,
+  "BROWSER": "chromium",
+  "TIMEOUT": 30000
+}
