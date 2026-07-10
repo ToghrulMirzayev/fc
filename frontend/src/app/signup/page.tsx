@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { appName } from "@/lib/branding";
+import { Footer } from "@/components/Footer";
 
 type BillingPlan = {
   tier: string;
@@ -136,7 +137,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-ink">
+    <div className="min-h-screen bg-ink flex flex-col">
       <header className="flex items-center justify-between border-b border-subtle px-8 py-5">
         <Logo size={32} />
         <div className="flex items-center gap-4">
@@ -391,11 +392,18 @@ export default function SignupPage() {
           </button>
 
           <p className="mt-3 text-center text-sm text-tertiary">
-            We'll never share your details. By submitting you agree to be
-            contacted about your request.
+            By creating an account you agree to our{" "}
+            <Link href="/terms" className="underline hover:text-coral">
+              Terms of Service
+            </Link>{" "}
+            and acknowledge our{" "}
+            <Link href="/privacy" className="underline hover:text-coral">
+              Privacy Policy
+            </Link>.
           </p>
         </form>
       </main>
+      <Footer />
     </div>
   );
 }

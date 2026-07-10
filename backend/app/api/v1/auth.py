@@ -1,6 +1,6 @@
 """Auth endpoints."""
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,6 +16,7 @@ from app.schemas.auth import (
     TokenPair,
     UpdateMeIn,
 )
+from app.core.config import settings
 from app.services.auth import AuthError, login, refresh_tokens
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -23,6 +24,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/login", response_model=TokenPair)
 async def login_endpoint(
+    response: Response,
     payload: LoginIn,
     db: AsyncSession = Depends(get_session),
 ) -> TokenPair:
@@ -38,21 +40,61 @@ async def login_endpoint(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials",
         )
-    return TokenPair(access_token=access, refresh_token=refresh)
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh,
+        httponly=True,
+        secure=settings.ENV != "dev",
+        samesite="lax",
+        path="/api/v1/auth",
+        max_age=settings.REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60,
+    )
+    return TokenPair(access_token=access)
 
 
 @router.post("/refresh", response_model=TokenPair)
 async def refresh_endpoint(
-    payload: RefreshIn,
+    response: Response,
+    payload: RefreshIn | None = None,
+    refresh_token: str | None = Cookie(default=None),
     db: AsyncSession = Depends(get_session),
 ) -> TokenPair:
+    token = refresh_token or (payload.refresh_token if payload else None)
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token missing",
+        )
     try:
-        _user, access, refresh = await refresh_tokens(db, payload.refresh_token)
+        _user, access, new_refresh = await refresh_tokens(db, token)
     except AuthError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e)
         )
-    return TokenPair(access_token=access, refresh_token=refresh)
+    response.set_cookie(
+        key="refresh_token",
+        value=new_refresh,
+        httponly=True,
+        secure=settings.ENV != "dev",
+        samesite="lax",
+        path="/api/v1/auth",
+        max_age=settings.REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60,
+    )
+    return TokenPair(access_token=access)
+
+
+@router.post("/logout")
+async def logout_endpoint(
+    response: Response,
+) -> dict[str, str]:
+    response.delete_cookie(
+        key="refresh_token",
+        path="/api/v1/auth",
+        secure=settings.ENV != "dev",
+        samesite="lax",
+        httponly=True,
+    )
+    return {"status": "ok"}
 
 
 async def _current_user_out(db: AsyncSession, user: User) -> CurrentUserOut:

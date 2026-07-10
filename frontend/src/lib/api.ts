@@ -14,7 +14,6 @@ const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const ACCESS_KEY = "auth.access";
-const REFRESH_KEY = "auth.refresh";
 
 let refreshPromise: Promise<string | null> | null = null;
 
@@ -23,39 +22,36 @@ export const tokens = {
     if (typeof window === "undefined") return null;
     return localStorage.getItem(ACCESS_KEY);
   },
-  get refresh() {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem(REFRESH_KEY);
-  },
-  set(access: string, refresh: string) {
+  set(access: string, _refresh?: string) {
     localStorage.setItem(ACCESS_KEY, access);
-    localStorage.setItem(REFRESH_KEY, refresh);
   },
   clear() {
     localStorage.removeItem(ACCESS_KEY);
-    localStorage.removeItem(REFRESH_KEY);
+    if (typeof window !== "undefined") {
+      fetch(`${API_URL}/api/v1/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      }).catch(() => {});
+    }
   },
 };
 
 async function refreshAccessToken(): Promise<string | null> {
   // Single-flight: parallel callers share one refresh attempt.
   if (refreshPromise) return refreshPromise;
-  const refresh = tokens.refresh;
-  if (!refresh) return null;
 
   refreshPromise = (async () => {
     try {
       const res = await fetch(`${API_URL}/api/v1/auth/refresh`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refresh_token: refresh }),
+        credentials: "include",
       });
       if (!res.ok) {
         tokens.clear();
         return null;
       }
       const data = await res.json();
-      tokens.set(data.access_token, data.refresh_token);
+      tokens.set(data.access_token);
       return data.access_token as string;
     } catch {
       tokens.clear();
@@ -84,12 +80,16 @@ export async function api<T = unknown>(
       headers.set("Content-Type", "application/json");
     }
     if (token) headers.set("Authorization", `Bearer ${token}`);
-    return fetch(`${API_URL}${path}`, { ...init, headers });
+    return fetch(`${API_URL}${path}`, {
+      credentials: "include",
+      ...init,
+      headers,
+    });
   };
 
   let res = await doRequest(tokens.access);
 
-  if (res.status === 401 && tokens.refresh) {
+  if (res.status === 401) {
     const newAccess = await refreshAccessToken();
     if (newAccess) {
       res = await doRequest(newAccess);
@@ -126,7 +126,7 @@ export async function login(
   password: string,
   workspaceSlug?: string,
 ) {
-  const data = await api<{ access_token: string; refresh_token: string }>(
+  const data = await api<{ access_token: string }>(
     "/api/v1/auth/login",
     {
       method: "POST",
@@ -137,7 +137,7 @@ export async function login(
       }),
     },
   );
-  tokens.set(data.access_token, data.refresh_token);
+  tokens.set(data.access_token);
   return data;
 }
 

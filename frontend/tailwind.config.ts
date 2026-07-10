@@ -64,15 +64,15 @@ const config: Config = {
         input: "var(--color-input-border)",
       },
       fontFamily: {
-        display: ["Inter", "-apple-system", "sans-serif"],
+        display: ["var(--font-sans)", "-apple-system", "sans-serif"],
         sans: [
-          "Inter",
+          "var(--font-sans)",
           "-apple-system",
           "BlinkMacSystemFont",
           "Segoe UI",
           "sans-serif",
         ],
-        mono: ["JetBrains Mono", "SF Mono", "Menlo", "monospace"],
+        mono: ["var(--font-mono)", "SF Mono", "Menlo", "monospace"],
       },
       fontSize: {
         "2xs": ["10px", { lineHeight: "1.4" }],
